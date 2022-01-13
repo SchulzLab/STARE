@@ -12,11 +12,11 @@
  * Part of STARE: https://github.com/SchulzLab/STARE
  */
 
-std::string to_string_with_precision(double a_value, const int n)
+std::string To_string_with_precision(double a_value)
 {
     // to_string of doubles is restricted to 6 digits, this is a workaround.
     std::ostringstream out;
-    out.precision(n);
+    out.precision(constants::precision);
     out << std::fixed << a_value;
     return out.str();
 }
@@ -38,16 +38,59 @@ bool SetBoolInput(std::string input_string, bool default_value) {
         return default_value;
     }
     else {
-        if ((input_string == "True") or (input_string == "TRUE") or (input_string == "true") or (input_string == "1")) {
+        if ((input_string == "True") or (input_string == "TRUE") or (input_string == "true") or (input_string == "T") or (input_string == "1")) {
             return true;
         }
-        else if ((input_string == "False") or (input_string == "FALSE") or (input_string == "false") or (input_string == "0")) {
+        else if ((input_string == "False") or (input_string == "FALSE") or (input_string == "false") or (input_string == "F") or (input_string == "0")) {
             return false;
         }
         else {
             return default_value;
         }
     }
+}
+
+bool Chr_sorter(std::string first, std::string second) {
+    // Sorts strings of potential ints and chars with the ints in increasing order and the chars at the end.
+    std::regex re_chr("^[0-9]+$");
+    if (std::regex_match(first, re_chr) and std::regex_match(second, re_chr)){
+        return stoi(first) < stoi(second);
+    }
+    if (not std::regex_match(first, re_chr)) {
+        return false;
+    }
+    else {
+        return true;
+    }
+}
+
+int FilePeek(std::string file_name) {
+    // Looks at the first 5 non-# line in the file and returns its length. Exits when the file can't be opened or
+    // when it's empty.
+    std::ifstream peek_file(file_name.c_str());
+    if (!peek_file) {
+        std::cout << "ERROR Could not open the file:\n" << file_name << std::endl;
+        return 1;
+    }
+    std::string line_peek;
+    std::vector<int> peek_lengths;
+    int row_count = 0;
+    while (!peek_file.eof()) {
+        getline(peek_file, line_peek);
+        if (line_peek.substr(0, 1) != "#") {
+            row_count++;
+            peek_lengths.push_back(line_peek.size());
+        }
+        if (row_count >= 5) {
+            break;
+        }
+    }
+    int peek_len = *max_element(std::begin(peek_lengths), std::end(peek_lengths));
+    if (peek_len == 0) {
+        std::cout << "ERROR Empty file:\n" << file_name << std::endl;
+        return 1;
+    }
+    return peek_len;
 }
 
 std::vector<std::string> SplitTabLine(std::string row) {
@@ -66,7 +109,7 @@ std::string GetStdoutFromCommand(std::string cmd) {
 // buffer, then returns it as a string.
     std::string data;
     FILE * stream;
-    const int max_buffer = 256;
+    const int max_buffer = 128;
     char buffer[max_buffer];
     cmd.append(" 2>&1");
 
@@ -78,6 +121,14 @@ std::string GetStdoutFromCommand(std::string cmd) {
         pclose(stream);
     }
     return data;
+}
+
+void Test_outfile(std::ofstream &out_file, std::string out_path) {
+    // Test if the output path is viable.
+    if (!out_file) {
+        std::cout << "ERROR Can't open the output path, please check carefully:\n" + out_path << std::endl;
+        exit(1);
+    }
 }
 
 void GzipFile(std::string file) {

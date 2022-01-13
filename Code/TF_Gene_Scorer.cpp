@@ -1,5 +1,5 @@
 //
-// Created by Dennis Hecker on 06.05.21.
+// Created by Dennis Hecker on 28.07.21.
 //
 
 # include <iostream>
@@ -24,10 +24,11 @@
  * window or is taken from the ABC-scoring (if done in advance).
  *
  * MacOS:
- * g++ TF_Gene_Scorer_parallel.cpp STARE_MiscFunctions.cpp -Xpreprocessor -fopenmp -std=c++11 -o TF_Gene_Scorer_parallel -lomp
+ * g++ TF_Gene_Scorer.cpp STARE_MiscFunctions.cpp -Xpreprocessor -fopenmp -lomp -O3 -std=c++11 -o TF_Gene_Scorer
  * Linux:
- * g++ TF_Gene_Scorer_parallel.cpp STARE_MiscFunctions.cpp -fopenmp -std=c++11 -o TF_Gene_Scorer_parallel
- * ./TF_Gene_Scorer_parallel -a ../Test/example_annotation.gtf -i region-TF-affinity-file -o output-dir -p ../PWMs/2.0/human_jaspar_hoc_kellis.PSEM -w 50000 -e TRUE
+ * g++ TF_Gene_Scorer.cpp STARE_MiscFunctions.cpp -fopenmp -O3 -std=c++11 -o TF_Gene_Scorer
+ *
+ * ./TF_Gene_Scorer -a ../Test/example_annotation.gtf -i region-TF-affinity-file -o output-dir -p ../PWMs/2.0/human_jaspar_hoc_kellis.PSEM -w 50000 -e TRUE
  *
  * Part of STARE: https://github.com/SchulzLab/STARE
  */
@@ -134,6 +135,11 @@ int main(int argc, char **argv) {
     unordered_map <string, vector<string>> tss_map;  // GeneID: [chr, 5'TSS]
     string row;
     ifstream Read_Gene_Annotation(a_gene_annotation);
+    if (!Read_Gene_Annotation) {
+        cout << "ERROR Could not open the gene annotation file\n" + a_gene_annotation << endl;
+        return 1;
+    }
+    cout << "reading gene annotation" << endl;
     int row_count = -1;
     while (!Read_Gene_Annotation.eof()) {
         getline(Read_Gene_Annotation, row);
@@ -173,6 +179,10 @@ int main(int argc, char **argv) {
     int length_helper = 0;
     string current_tf = "";
     ifstream Read_PSEM(p_psem_file);
+    if (!Read_PSEM) {
+        cout << "ERROR Could not open the PSEM file\n" + p_psem_file << endl;
+        return 1;
+    }
     while (!Read_PSEM.eof()) {
         getline(Read_PSEM, row);
         if ((row.rfind(">", 0) == 0)) {
@@ -201,17 +211,22 @@ int main(int argc, char **argv) {
 
     // Fetch the region-tf affinities and do the intersection with the gene windows if no ABC-scoring file was provided.
     // Already allocate two vectors in that datastructure to later store potential region scalings.
+    cout << "Read TRAP's affinity files" << endl;
     unordered_map < string, array < vector < double >, 2 >> region_affinities;
     Read_Affinity.open(i_tf_region_affinity);
     row_count = -1;
     vector<int> motif_lengths;  // Already write a vector with the motif lengths according to the file header.
     string tf_header;
+    if (!Read_Affinity) {
+        cout << "ERROR Could not open TRAP's affinity file\n" + i_tf_region_affinity << endl;
+        return 1;
+    }
     while (!Read_Affinity.eof()) {
         getline(Read_Affinity, row);
         if (row_count == -1) {
             tf_header = row;
             vector <string> tf_names = SplitTabLine(row);
-            for (int i = 1; i < tf_names.size(); i++) {
+            for (int i = 1; i < tf_names.size(); i++) {  // No need to
                 motif_lengths.push_back(motif_length_map[tf_names[i]]);
             }
         }
@@ -229,12 +244,12 @@ int main(int argc, char **argv) {
             peak_locations.push_back(
                     region_string.substr(0, colon_pos) + "\t" + to_string(region_start) + "\t" + to_string(region_end));
             string col_val;
-            vector<double> affinity_vals;
+            vector<double> affinity_vals(motif_lengths.size());
             stringstream row_read(row);
             int col_count = 0;
             while (getline(row_read, col_val, '\t')) {
                 if (col_count > 0) {
-                    affinity_vals.push_back(stod(col_val));
+                    affinity_vals[col_count - 1] = (stod(col_val));  // -1 because of the row index.
                 }
                 col_count++;
             }
@@ -242,7 +257,7 @@ int main(int argc, char **argv) {
         }
         row_count++;
     }
-
+    cout << "TRAP file read" << endl;
     // ____________________________________________________________
     // GET SCALING COLS - if specified
     // ____________________________________________________________
@@ -271,13 +286,16 @@ int main(int argc, char **argv) {
             }
         }
     }
-    unordered_map<int, string> colname_map = FileHeaderMapping(b_scalingfile, start_col, last_col);
 
-    unordered_map <string, unordered_map<int, double>> interaction_scores;  // Stores the ABC-Score of region-gene interactions.
+    unordered_map<int, string> colname_map = FileHeaderMapping(b_scalingfile, start_col, last_col);
+    // Stores the intergenic score of region-gene interactions.
+     unordered_map <string, unordered_map<int, double>> interaction_scores;
     bool use_abc_scoring = false;
     if ((abc_abc_output != "False") and (abc_abc_output != "FALSE") and (abc_abc_output != "false") and
         (abc_abc_output != "0") and (abc_abc_output.size() > 1)) {
+        cout << "Get the gene-region mapping from the ABC-scoring file(s)" << endl;
         use_abc_scoring = true;
+        window_size = 2500;  // To later add the peaks in promoter range.
         // ____________________________________________________________
         // GET INTERACTIONS FROM ABC OUT - if available
         // ____________________________________________________________
@@ -286,7 +304,7 @@ int main(int argc, char **argv) {
         // the affinities, instead of the distance decay.
         // Fetch all ABC-scoring files.
         vector<string> abc_files;
-        if (start_col == last_col) {
+        if (start_col == last_col and ifstream(abc_abc_output).is_open()) {
             abc_files = {abc_abc_output};
         }
         else {
@@ -304,9 +322,8 @@ int main(int argc, char **argv) {
                     regex_search(abc_abc_output, re_col_match, re_header);
                     if (re_col_match.size() > 0) {
                         col_suffix_pos = re_col_match.position(re_col_match.size() - 1);
-                    } else {
-                        col_suffix_pos =
-                                abc_abc_output.size() - 7;  // If there's no _cN.txt ending we cut it at the ending.
+                    } else {  // If there's no _cN.txt ending we cut it at the ending.
+                        col_suffix_pos = abc_abc_output.size() - 7;  // - .txt.gz
                     }
                     abc_files.push_back(abc_abc_output.substr(0, col_suffix_pos) + colname_map[a_col] + ".txt.gz");
                 }
@@ -315,90 +332,114 @@ int main(int argc, char **argv) {
 
         for (int abc = 0; abc < abc_files.size(); abc++) {
             unordered_map<string, int> abc_header_map;
-            istringstream Read_ABC(GetStdoutFromCommand(string("zcat < ") + abc_files[abc]));
+            string abc_cmd = string("zcat < ") + abc_files[abc] + " 2>&1";
+            FILE* abc_stream = popen(abc_cmd.c_str(), "r");
+            char abc_buffer[512];  // Max in the usual format is 148.
             row_count = -1;
-            while (!Read_ABC.eof()) {
-                getline(Read_ABC, row);
-                if (row_count == -1) {
-                    vector <string> columns = SplitTabLine(row);
-                    for (int c = 0; c < columns.size(); c++) {
-                        string non_comm = columns[c];  // To remove any potential # from the header.
-                        non_comm.erase(remove(non_comm.begin(), non_comm.end(), '#'), non_comm.end());
-                        abc_header_map[non_comm] = c;
+            if (abc_stream) {
+                while (!feof(abc_stream)) {
+                    if (fgets(abc_buffer, 512, abc_stream) != NULL) {
+                        string row = abc_buffer;
+                        if (row_count == -1) {
+                            vector <string> columns = SplitTabLine(row);
+                            for (int c = 0; c < columns.size(); c++) {
+                                string non_comm = columns[c];  // To remove any potential # from the header.
+                                non_comm.erase(remove(non_comm.begin(), non_comm.end(), '#'), non_comm.end());
+                                abc_header_map[non_comm] = c;
+
+                            }
+                        } else if (row.size() > 0) {
+                            vector <string> columns = SplitTabLine(row);
+                            string gene_id = columns[abc_header_map["Ensembl ID"]];
+                            string peak_id = columns[abc_header_map["PeakID"]];
+                            gene_region_map[gene_id].insert(peak_id);
+                            interaction_scores[gene_id + "-" + peak_id][abc] = stod(columns[abc_header_map["intergenicScore"]]);
+                        }
+                        row_count++;
                     }
-                } else if (row.size() > 0) {
-                    vector <string> columns = SplitTabLine(row);
-                    string gene_id = columns[abc_header_map["Ensembl ID"]];
-                    string peak_id = columns[abc_header_map["PeakID"]];
-                    gene_region_map[gene_id].insert(peak_id);
-                    interaction_scores[gene_id + "-" + peak_id][abc] = stod(columns[abc_header_map["ABC-Score"]]);
                 }
-                row_count++;
+                pclose(abc_stream);
+            }
+            else {
+                cout << "ERROR Could not open ABC-scored file, command was the following:\n" << abc_cmd << endl;
+                return 1;
             }
         }
     }
 
+    // ____________________________________________________________
+    // WRITE TEMPORARY GENE WINDOW FILE
+    // ____________________________________________________________
+    // Is not written directly on gtf-file read, as we need to find the most 5'-TSS first.
+    string temp_window_file = a_gene_annotation.substr(0, a_gene_annotation.size() - 4) + "_temp_windows.bed";
+    ofstream window_out(temp_window_file);
+    Test_outfile(window_out, temp_window_file);
+    for (auto const &gene : tss_map) {
+        int window_start = stoi(gene.second[1]) - window_size;
+        if (window_start < 0) {
+            window_start = 0;
+        }
+        string chr = gene.second[0];
+        if (chr.substr(0, 3) == "chr") {  // Remove potential chr prefix, we removed it for the peaks as well.
+            chr = chr.substr(3);
+        }
+        window_out << chr << "\t" << to_string(window_start) << "\t"
+                   << to_string(stoi(gene.second[1]) + window_size) << "\t" << gene.first << "\n";
+    }
+    window_out.close();
+
+    // ____________________________________________________________
+    // WRITE BED FILE FOR PEAK REGIONS
+    // ____________________________________________________________
+    string temp_region_file = i_tf_region_affinity.substr(0, i_tf_region_affinity.size() - 4) + "_temp_regions.bed";
+    ofstream region_out(temp_region_file);
+    Test_outfile(region_out, temp_region_file);
+    for (string region: peak_locations) {
+        region_out << region << "\n";
+    }
+    region_out.close();
+
+    // ____________________________________________________________
+    // INTERSECT REGIONS WITH GENE WINDOWS
+    // ____________________________________________________________
+    // If abc-scoring was done, still do the intersections to include the promoters.
+    string bed_intersect_cmd = "bedtools intersect -a " + temp_window_file + " -b " + temp_region_file + " -wo 2>&1";
+    char intersect_buffer[256];  // Only has the gene window and coordinates of the candidate enhancer.
+    FILE* bed_intersect_stream = popen(bed_intersect_cmd.c_str(), "r");
+    if (bed_intersect_stream) {
+        while (!feof(bed_intersect_stream)) {
+            if (fgets(intersect_buffer, 256, bed_intersect_stream) != NULL) {
+                string line = intersect_buffer;
+                // Process the bed_output, by mapping the regions to the respective genes.
+                vector <string> columns = SplitTabLine(line);
+                string region_name = columns[4] + ":" + columns[5] + "-" + columns[6];
+                gene_region_map[columns[3]].insert(region_name);
+            }
+        }
+    }
     else {
-        // ____________________________________________________________
-        // WRITE TEMPORARY GENE WINDOW FILE
-        // ____________________________________________________________
-        // Is not written directly on gtf-file read, as we need to find the most 5'-TSS first.
-        string temp_window_file = a_gene_annotation.substr(0, a_gene_annotation.size() - 4) + "_temp_windows.bed";
-        ofstream window_out(temp_window_file);
-        for (auto const &gene : tss_map) {
-            int window_start = stoi(gene.second[1]) - window_size;
-            if (window_start < 0) {
-                window_start = 0;
-            }
-            string chr = gene.second[0];
-            if (chr.substr(0, 3) == "chr") {  // Remove potential chr prefix, we removed it for the peaks as well.
-                chr = chr.substr(3);
-            }
-            window_out << chr << "\t" << to_string(window_start) << "\t"
-                       << to_string(stoi(gene.second[1]) + window_size) << "\t" << gene.first << "\n";
-        }
-        window_out.close();
+        cout << "ERROR Intersection of gene windows and peaks was not possible, command was the following:\n"
+        << bed_intersect_cmd << endl;
+        return 1;
+    }
+    // Remove the temporary files again.
+    GetStdoutFromCommand("rm " + temp_region_file);
+    GetStdoutFromCommand("rm " + temp_window_file);
 
-        // ____________________________________________________________
-        // WRITE BED FILE FOR PEAK REGIONS
-        // ____________________________________________________________
-        string temp_region_file = i_tf_region_affinity.substr(0, i_tf_region_affinity.size() - 4) + "_temp_regions.bed";
-        ofstream region_out(temp_region_file);
-        for (string region: peak_locations) {
-                region_out << region << "\n";
-        }
-        region_out.close();
-
-        // ____________________________________________________________
-        // INTERSECT REGIONS WITH GENE WINDOWS
-        // ____________________________________________________________
-        string bed_intersect_cmd = "bedtools intersect -a " + temp_window_file + " -b " + temp_region_file + " -wo";
-        string bed_intersect_out = GetStdoutFromCommand(bed_intersect_cmd);
-
-        // Process the bed_output, by mapping the regions to the respective genes.
-        istringstream bed_line_reader(bed_intersect_out);
-        for (string line; getline(bed_line_reader, line);) {
-            vector <string> columns = SplitTabLine(line);
-            string region_name = columns[4] + ":" + columns[5] + "-" + columns[6];
-            gene_region_map[columns[3]].insert(region_name);
-        }
-        // Remove the temporary files again.
-        GetStdoutFromCommand("rm " + temp_region_file);
-        GetStdoutFromCommand("rm " + temp_window_file);
-
-        // Check which genes didn't have any regions in their window.
-        for (auto const &gene : tss_map) {
-            if (gene_region_map.find(gene.first) == gene_region_map.end()) {
-                kicked_genes[gene.first] = "No open region in gene window";
-            }
+    // Check which genes didn't have any regions in their window.
+    for (auto const &gene : tss_map) {
+        if (gene_region_map.find(gene.first) == gene_region_map.end()) {
+            kicked_genes[gene.first] = "No open region in gene window";
         }
     }
+
     // ____________________________________________________________
     // FETCH POTENTIAL AFFINITY SCALINGS
     // ____________________________________________________________
     // If one or more scaling columns were specified we go through the peak file and fetch them as vector for each region.
-    if (n_scalingcol != "0" and !use_abc_scoring) {
+    if (n_scalingcol != "0") {
         // Find the total number of columns first.
+        cout << "Fetch affinity scalings out of the region file." << endl;
         int row_counter = 0;
         ifstream scaling_reader(b_scalingfile);
         while (!scaling_reader.eof()) {
@@ -427,65 +468,73 @@ int main(int argc, char **argv) {
         candidate_genes.push_back(gene.first);
     }
     // Write one output file for each activity column.
+    cout << "Summarize the region affinities on gene level." << endl;
     for (int c = 0; c < (last_col + 1) - start_col; ++c) {
         string column_suffix = "";
         if (n_scalingcol != "0") {
             column_suffix = colname_map[c + start_col];
         }
+        cout << "Starting activity column " << column_suffix << endl;
         // Allocate as vector so that each gene's affinities is at the same index as it's ID in candidate_genes.
         vector <vector<double>> gene_tf_affinities(candidate_genes.size(), vector<double>(num_tfs));
 #pragma omp parallel for num_threads(cores)
         for (int g = 0; g < candidate_genes.size(); g++) {  // Runs once if zero or one column was given.
             string gene = candidate_genes[g];
-            vector<double> these_gene_affinities(num_tfs, 0.0);
+            vector<double> these_gene_affinities(num_tfs + 2, 0.0);
+            int distance_helper = 0;
             int gene_tss = stoi(tss_map[gene][1]);
 
             for (string region: gene_region_map[gene]) {
-                double affinity_scaler = 1;  // Decay factor, ABC-score, or 1.
-                double activity_scaler = 1;  // If column(s) were specified in the peak file.
+                double affinity_scaler = 1;  // Activity * Decay factor / ABC-score, or 1.
                 array<vector<double>, 2> region_info = region_affinities[region];
                 vector<double> affinity_vals = region_info[0];
-                if (n_scalingcol != "0" and !use_abc_scoring) {
-                    activity_scaler = region_info[1][c];
-                }
 
                 if (affinity_vals.size() > 0) {  // Should only happen if someone ran ABC-scoring independently before.
                     int colon = region.find(":", 0);
                     int hyphon = region.find("-", 0);
                     int start = stoi(region.substr(colon + 1, hyphon - colon - 1));
                     int end = stoi(region.substr(hyphon + 1));
-                    int region_len = abs(end - start);
-                    int mid = (start + end) / 2;
-                    if (decay) {
-                            affinity_scaler = exp(-(abs(gene_tss - mid) / 5000.0));
+                    double distance = min(abs(gene_tss - start), abs(gene_tss - end));
+                    distance_helper += distance;
+                    if (n_scalingcol != "0" and !use_abc_scoring) {
+                        affinity_scaler = region_info[1][c];
                     }
-                    if (use_abc_scoring) {
+                    if (decay) {
+                        affinity_scaler *= exp(-(distance / 5000.0));
+                    }
+                    if (use_abc_scoring and distance <= 2500) {
+                        affinity_scaler = region_info[1][c] * exp(-(distance / 5000.0));
+                    }
+                    else if (use_abc_scoring) {  // Scale with the intergenic score column.
                         affinity_scaler = interaction_scores[gene + "-" + region][c];  // 0 if not existent.
                     }
-
                     // Add the whole normalized affinity vector to the already existing one.
                     for (int i = 0; i < num_tfs; i++) {
-                        these_gene_affinities[i] +=
-                                ((affinity_vals[i] * activity_scaler) / (region_len - motif_lengths[i] + 1)) *
-                                affinity_scaler;
+                        these_gene_affinities[i] += (affinity_vals[i] / motif_lengths[i]) * affinity_scaler;
                     }
                 }
             }
+            these_gene_affinities[num_tfs] = gene_region_map[gene].size();
+            these_gene_affinities[num_tfs + 1] = distance_helper / gene_region_map[gene].size();
             gene_tf_affinities[g] = these_gene_affinities;
         }
 
         // ____________________________________________________________
         // WRITE TF-GENE AFFINITY OUTPUT
         // ____________________________________________________________
+        cout << "writing and compressing activity column" << endl;
         ofstream gene_tf_out(o_output_prefix + "_TF_Gene_Affinities" + column_suffix + ".txt");
-        gene_tf_out << "geneID" + tf_header + "\n";
+        Test_outfile(gene_tf_out, o_output_prefix + "_TF_Gene_Affinities" + column_suffix + ".txt");
+        gene_tf_out << "geneID" + tf_header + "\t" + "NumPeaks" + "\t" + "AvgPeakSize" + "\n";
         for (int g = 0; g < candidate_genes.size(); g++) {
             string gene = candidate_genes[g];
             vector<double> these_affinities = gene_tf_affinities[g];
             gene_tf_out << gene;
             for (int i = 0; i < num_tfs; i++) {
-                gene_tf_out << "\t" << to_string_with_precision(these_affinities[i]);
+                gene_tf_out << "\t" << To_string_with_precision(these_affinities[i]);
             }
+            gene_tf_out << "\t" << to_string(static_cast<double>(these_affinities[num_tfs]));  // NumPeaks
+            gene_tf_out << "\t" << to_string(these_affinities[num_tfs + 1]);  // AvgPeakSize
             gene_tf_out << "\n";
         }
         gene_tf_out.close();  // Otherwise the return of the command would be written to output.
@@ -494,9 +543,8 @@ int main(int argc, char **argv) {
     // ____________________________________________________________
     // WRITE DISCARDED GENES FILE
     // ____________________________________________________________
-    ofstream discarded_out;
-    discarded_out.open(o_output_prefix + "_discarded_Genes.txt",
-                       ios_base::app);  // Append, for the case ABC was done before.
+    ofstream discarded_out(o_output_prefix + "_discarded_Genes.txt");
+    Test_outfile(discarded_out, o_output_prefix + "_discarded_Genes.txt");
     for (auto const &gene : kicked_genes) {
         discarded_out << gene.first << "\t" << gene.second << "\n";
     }
