@@ -22,7 +22,7 @@ Once you got all of the above installed, you can find two scripts in **/Code**: 
 # Get started
 The following schema should give you an overview on how you can tune STARE's settings to run it properly for your data. 
 
-![STARE_Flow](/Figures/STARE_FlowBig.pdf)
+![STARE_Flow](/Figures/STARE_FlowBig.png)
 
 If you want to test your installation and try out some example runs, look into the **/Test** folder. From within the folder you can run:
 
