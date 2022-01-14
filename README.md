@@ -59,3 +59,7 @@ We will soon provide a preprint paper about STARE and its implementation, includ
 	 - https://github.com/broadinstitute/ABC-Enhancer-Gene-Prediction
  - Combining transcription factor binding affinities with open-chromatin data for accurate gene expression prediction Schmidt et al., Nucleic Acids Research 2016; doi: 10.1093/nar/gkw1061
 	 - https://github.com/schulzlab/tepic
+
+The results of our analyses are available via Zenodo.
+
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.5841992.svg)](https://doi.org/10.5281/zenodo.5841991)
