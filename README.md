@@ -37,7 +37,7 @@ The output unsurprisingly depends on your input and the options you chose. Howev
 
 **ABC output:**
 
- - *Pancake_ABCpp_scoredInteractions.txt.gz* : 
+- *Pancake_ABCpp_scoredInteractions.txt.gz* : Lists all the enhancer-gene interactions that were scored higher than your set cut-off -t. 
  - *Pancake_GeneInfo.txt.gz*: Summarises a variety of features for each gene. Here are details on the not so intuitive ones:
 	 - *Avg_EnhancerActivity*: average of the activity of all enhancers that were mapped to that gene
 	 - *Avg_EnhancerContact* average contact of all enhancers that were mapped to that gene, that includes the pseudocount
