@@ -26,7 +26,7 @@ The following schema should give you an overview on how you can tune STARE's set
 
 If you want to test your installation and try out some example runs, look into the **/Test** folder. From within the folder you can run:
 
-    ./run runTestCases.sh
+    ./runTestCases.sh
 
 It executes a range of very small examples with varying flags and should tell you if something didn't go as planned.
 
