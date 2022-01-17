@@ -254,7 +254,6 @@ int main(int argc, char **argv) {
     // First check if the peak file has a chr-prefix. This can happen if the executable is called independent of the
     // TEPIC bash script which pre-processes the peak file.
     // Also directly check for the signal columns in case n++ was given.
-    cout << "writing temp gene window file" << endl;
     ifstream peek_peak(b_peakfile);
     if (!peek_peak) {
         cout << "ERROR could not open the peak file\n" << b_peakfile << endl;
@@ -362,7 +361,6 @@ int main(int argc, char **argv) {
     // ____________________________________________________________
     // Call the bedtools intersect command via popen.
     string bed_intersect_cmd = "bedtools intersect -a " + temp_window_file + " -b " + b_peakfile + " -wo 2>&1";
-    cout << "INtersecting genes and peaks" << endl;
     // Process the whole bed_output, by mapping the peak_ids to the respective genes and also map the location and
     // activity of the peaks in a separate map, and gather the genes for each chromosome.
     unordered_map <string, set<string>> gene_peak_map; // Storing the names of peaks in the window.
@@ -632,7 +630,7 @@ int main(int argc, char **argv) {
                     these_contacts.push_back(this_contact);
                     ++peak;
                 } else {  // Remove the peaks that are only in the enh-window, we only needed them for the contact_sum.
-                    gene_peak_map[chr_gene].erase(*peak);
+                    peak = gene_peak_map[chr_gene].erase(peak);
                 }
             }
             gene_contact_map[chr_gene] = these_contacts;
