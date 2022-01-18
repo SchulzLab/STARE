@@ -231,7 +231,7 @@ echo -e "Number of considered pwms\t""$numMat" >> "$metadatafile"
 # ------------------------------------------------------------------------------------------------------
 # REGION PROCESSING
 # ------------------------------------------------------------------------------------------------------
-echo "Preprocessing region file: Removing chr prefix_path, sorting regions and removing duplicates"
+echo "Preprocessing region file"
 
 sed 's/chr//g' "$regions" >  "${filteredRegions}"_Filtered_Regions.bed
 sort -s -k1,1 -k2,2 -k3,3 "${filteredRegions}"_Filtered_Regions.bed | uniq > "${filteredRegions}"_sorted.bed
@@ -249,7 +249,6 @@ fi
 
 if [ "${chrPrefix}" == "TRUE" ];
 then
-	echo "Adapting chr prefix_path in bed files for intersection with the reference genome"
 	awk '{print "chr"$1"\t"$2"\t"$3}' "${filteredRegions}"_sorted.bed > "${prefix_path}"_tempFasta.bed
 	sed -e '/^chr#/d' "${prefix_path}"_tempFasta.bed > "${prefix_path}"_tempFastaNoHeader.bed
 	rm "${prefix_path}"_tempFasta.bed
@@ -266,7 +265,6 @@ then
 	rm "${getFastaRegion}"
 fi
 
-echo "Converting invalid characters"
 # Replace invalid characters in the fasta file with 'N', but skip the id rows (">...").
 "${working_dir}"/ReplaceInvalidChars -i "$openRegionSequences" -o "${prefix_path}"_FilteredSequences.fa -d "${prefix_path}"_maxRow.txt
 rm "$openRegionSequences"
@@ -284,7 +282,7 @@ rm "${prefix_path}"_FilteredSequences.fa
 rm "${prefix_path}"_maxRow.txt
 
 endt=`date +%s`
-echo "Time TRAP:" $((endt-startt))
+echo $((endt-startt))"s TRAP"
 
 # ------------------------------------------------------------------------------------------------------
 # RUN ABC-SCORING if flags are present
@@ -309,7 +307,7 @@ mkdir "${prefixP}""/Gene_TF_matrices"
 "${working_dir}"/TF_Gene_Scorer -a "${annotation}" -b "${filteredRegions}"_sorted.bed -n "${column}" -i "${affinity}" -o "${prefixP}"/Gene_TF_matrices/"${base_prefix}" -p "${pwms}" -w ${window} -e "${decay}" -c "${cores}" -abc "${existing_abc}"
 
 endg=`date +%s`
-echo "Time TF-Gene Scores:" $((endg-startg))
+echo $((endg-startg))"s TF-Gene Scores"
 
 
 # Clean-Up

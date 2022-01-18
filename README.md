@@ -1,7 +1,8 @@
 
+
 # STARE - Look into TF regulation on gene level leveraging an adapted Activity-By-Contact score
 
-STARE is a framework that combines two tasks, which also work independently from each other:
+STARE is a framework that combines two tasks, which can also work independently:
 
  - score enhancer-gene interactions with the Activity-By-Contact (ABC) model
  - derive TF affinities for regions
@@ -18,10 +19,11 @@ Those two parts are combined to summarise TF affinities on gene level, which all
 Once you got all of the above installed, you can clone the GitHub repository
 
     git clone https://github.com/SchulzLab/STARE.git
-or download the source code and unzip it.  You will find two scripts in **/Code**: *compile_STARE_macOS.sh* and *compile_STARE_Linux.sh* which should compile the C++ scripts for your respective system if you run them. The paths are relative, you can call them from any directory:
+or download the source code and unzip it.  You will find two scripts in **/Code**: *compile_STARE_macOS.sh* and *compile_STARE_Linux.sh* which should compile the C++ scripts for your platform if you run them. The paths are relative, you can call them from any directory:
 
     ./Code/compile_STARE_macOS.sh
-    <or>
+or
+
     ./Code/compile_STARE_Linux.sh
 
 # Get started
@@ -29,7 +31,7 @@ The following schema should give you an overview on how you can tune STARE's set
 
 ![STARE_Flow](/Figures/STARE_FlowBig.png)
 
-If you want to test your installation and try out some example runs, we have the *Code/runTestCases.sh* script for you. It serves purposes: 
+If you want to test your installation and try out some example runs, we have the *Code/runTestCases.sh* script for you. It serves the following purposes: 
 - It gives examples on how to run STARE and which flags to use. To get inspiration have a look at the individual test commands.
 - It also compares the output of its test runs against pre-computed results to make sure that the installation worked correctly (**/Test/Test_Controls/**). It will tell you with a subtle ERROR massage if something went wrong.
 
