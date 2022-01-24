@@ -15,6 +15,7 @@ Those two parts are combined to summarise TF affinities on gene level, which all
 * [bedtools](https://github.com/arq5x/bedtools2); Please make sure to add the bedtools installation to your path
 * g++ to compile the C++ scripts 
 * openmp for parallel computing; unfortunately, the installation is system-dependent
+* [Boost C++ Library](https://www.boost.org/)
 
 Once you got all of the above installed, you can clone the GitHub repository
 
