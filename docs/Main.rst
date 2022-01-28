@@ -80,11 +80,11 @@ All of the listed data are mandatory for STARE to work. You will find examples f
 
 .. csv-table:: 
    :header: "Flag", "Description"
-   :widths: 18, 50
+   :widths: 18, 40
 
    -b / --bed_file, Bed-file containing your candidate regions. Headers are allowed if they start with #.
    -g / --genome, Genome fasta file in RefSeq format.
-   -p / --psem **or** -s / --pscm, Either one of the provided PSEMs (Position Specific Energy Matrix) or an own PSCM (Position Specific Count Matrix) in transfac format which will then be automatically converted to PSEM. If you give a PSCM you can optionally also add the GC-content with the -y flag as described below. For details see *LINK TO SECTION*
+   -p / --psem **or** -s / --pscm, Either one of the provided PSEMs (Position Specific Energy Matrix) or an own PSCM (Position Specific Count Matrix) in transfac format which will then be automatically converted to PSEM. If you give a PSCM you can optionally also add the GC-content with the -y flag as described below. For details see `PSEMs and PSCMs <https://stare.readthedocs.io/en/latest/PSEMs_and_PSCMs.html>`_.
    -a / --annotation, Gene annotation file in gtf-format.
    -o / --output, Name of the output folder. The folder will be created and can't already exists to prevent overwriting of files. All output files will have the folder name as prefix.
 
@@ -96,7 +96,7 @@ There are more tunable options for STARE, some of which will be explained in mor
 
 .. csv-table:: 
    :header: "Flag", "Description"
-   :widths: 20, 50
+   :widths: 20, 40
 
    -n / --column :sup:`* ABC`, Column(s) in the --bed_file representing the activity of the region. You will get one set of output files for each column. Start counting at 1. Allowed formats are individual columns; column ranges; columns separated by comma as well as a start column with all consecutive columns.  
    -y / --gc_content , Mean GC-content of the organism. Only required if a PSCM (-s) should be converted to a PSEM (-p) (Default 0.41 for human).
@@ -128,7 +128,7 @@ But why multiple columns? You can specify multiple columns if you have single-ce
   :target: ../Figures/STARE_ColumnOptions.pdf
 
 
-As of now, there is no option to use chromatin contact data on single-cell level. You would have to create your own interaction file (see below *LINK EXISTING ABC*). Also, if you have a separate set of regions for each cell, you would have to call STARE separately for each one.
+As of now, there is no option to use chromatin contact data on single-cell level. You would have to create your own interaction file (see below in the section about the --existing-abc). Also, if you have a separate set of regions for each cell, you would have to call STARE separately for each one.
 
 -f / --contact_folder
 ------------------
@@ -169,6 +169,7 @@ You will get two files for each activity column you gave, one with all the inter
   :alt: STARE_ABC_Tables
   :target: ../Figures/STARE_ABCOutput_Tables.pdf
 
+You can also call the ABC-part independently, without producing a gene-TF matrix, see `Separate ABC <https://stare.readthedocs.io/en/latest/Separate_ABC.html>`_.
 
 Gene-TF-matrices
 ===============
