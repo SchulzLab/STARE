@@ -1,4 +1,4 @@
-STARE - Look into TF regulation on gene level leveraging an adapted Activity-By-Contact score
+STARE
 ===========================================================================
 .. toctree::
       :maxdepth: 1
