@@ -123,6 +123,7 @@ But why multiple columns? You can specify multiple columns if you have single-ce
 
 .. image:: /Figures/STARE_ColumnOptions.png
   :alt: STARE_Columns
+  :width: 800
 
 As of now, there is no option to use chromatin contact data on single-cell level. You would have to create your own interaction file (see below *LINK EXISTING ABC*). Also, if you have a separate set of regions for each cell, you would have to call STARE separately for each one.
 
