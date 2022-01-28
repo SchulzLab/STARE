@@ -41,7 +41,7 @@ The following schema should give you an overview of STARE's function and what se
 
 .. image:: ../Figures/STARE_FlowBig.png
   :alt: STARE_overview
-  :target: ../Figures/STARE_FlowBig.pdf
+  :target: https://github.com/SchulzLab/STARE/blob/main/Figures/STARE_FlowBig.pdf
 
 
 If you want to test your installation and try out some examples, we have the *Code/runTestCases.sh* script for you. It serves the following purposes:
@@ -125,7 +125,7 @@ But why multiple columns? You can specify multiple columns if you have single-ce
 .. image:: ../Figures/STARE_ColumnOptions.png
   :alt: STARE_Columns
   :width: 600
-  :target: ../Figures/STARE_ColumnOptions.pdf
+  :target: https://github.com/SchulzLab/STARE/blob/main/Figures/STARE_ColumnOptions.pdf
 
 
 As of now, there is no option to use chromatin contact data on single-cell level. You would have to create your own interaction file (see below in the section about the --existing-abc). Also, if you have a separate set of regions for each cell, you would have to call STARE separately for each one.
@@ -167,7 +167,7 @@ You will get two files for each activity column you gave, one with all the inter
 
 .. image:: ../Figures/STARE_ABCOutput_Tables.png
   :alt: STARE_ABC_Tables
-  :target: ../Figures/STARE_ABCOutput_Tables.pdf
+  :target: https://github.com/SchulzLab/STARE/blob/main/Figures/STARE_ABCOutput_Tables.pdf
 
 You can also call the ABC-part independently, without producing a gene-TF matrix, see `Separate ABC <https://stare.readthedocs.io/en/latest/Separate_ABC.html>`_.
 
