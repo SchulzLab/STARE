@@ -121,7 +121,7 @@ There are more tunable options for STARE, some of which will be explained in mor
 
 But why multiple columns? You can specify multiple columns if you have single-cell data, where you have one unified set of candidate regions, but multiple activity measurements. This can be either on the level of individual cells, aggregated cells, like metacells, or cell types. The figure below should illustrate this idea. You clustered your single cells to distinct cell types and you derived a summarised activity metric for each of them, which you wrote into the --bed_file. You can also see examples how to select columns with the -n flag.
 
-.. image:: /Figures/STARE_ColumnOptions.png
+.. image:: ../Figures/STARE_ColumnOptions.png
   :alt: STARE_Columns
   :width: 800
 
