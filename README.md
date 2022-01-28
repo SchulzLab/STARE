@@ -11,7 +11,7 @@ STARE is a framework that combines two tasks, which can also work independently:
  
 Those two parts are combined to summarise TF affinities on gene level, which allows for a variety of further downstream analyses. If this sounds interesting to you, here's how you get started.
 
-You can find a full documentation on [Read the Docs](https://stare.readthedocs.io/en/latest/index.html)
+You can find a full documentation on [Read the Docs](https://stare.readthedocs.io/en/latest/index.html).
 
 ![STARE Logo](Figures/STARE_Logo.png)
 
