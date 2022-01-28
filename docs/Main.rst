@@ -184,9 +184,4 @@ Output per activity column (-n)
 
 You will get one set of output files for each activity column. The files will be named according to the header of those columns, or according to their index, if you didn't have a header. For example, if one of your activity columns was named *sirup*, your gene-TF matrix file would be *Pancake_TF_Gene_Affinities_sirup.txt.gz*.
 
-***************
-Contact
-***************
-Suggestions, problems, ideas for additional functionality? Don't hesitate to open an `issue on GitHub <https://github.com/SchulzLab/STARE/issues>`_.
-
 
