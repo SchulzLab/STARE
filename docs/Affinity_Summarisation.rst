@@ -8,6 +8,7 @@ The basic idea is always the same. We sum up the *tf* affinities of the regions 
 
 .. image:: ../Figures/STARE_BaseEquation.png
   :alt: STARE_BaseEquation
+  :target: ../Figures/STARE_BaseEquation.pdf
 
 Now the *scaler* is where it changes depending on how the region-gene mapping was done. The different approaches make use of different types of data, which allows to integrate more data modalities.
 
@@ -18,6 +19,7 @@ In case that all regions within a window around the TSS are considered relevant,
 
 .. image:: ../Figures/STARE_WindowEquation.png
   :alt: STARE_WindowEquation
+  :target: ../Figures/STARE_WindowEquation.pdf
 
 The scaling with the activity of the region is only done when activity columns were specific (-n). The scaling with the exponential decay function can be turned off with *-e False*, for example for very small window sizes. The distance decay can only be turned off for the Gene window-version, for the ABC-mode it is always on.
 
@@ -28,6 +30,7 @@ If you did the region-gene mapping with the ABC-score, we change the scaling and
 
 .. image:: ../Figures/STARE_AdaptedABCEquation.png
   :alt: STARE_AdaptedABCEquation
+  :target: ../Figures/STARE_AdaptedABCEquation.pdf
 
 Not-adapted ABC-scoring
 ******************
@@ -36,6 +39,7 @@ If you chose the run the ABC-scoring without the adapted score, we can't use the
 
 .. image:: ../Figures/STARE_UnadaptedABCEquation.png
   :alt: STARE_UnadaptedABCEquation
+  :target: ../Figures/STARE_UnadaptedABCEquation.pdf
 
 The -e flag also doesn't change the scaling in this setup.
 
