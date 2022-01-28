@@ -62,11 +62,11 @@ Input and options
 
 There are two ways to set the flags for STARE.
 
-Either with hyphen, one character and one whitespace::
+Either hyphen immediately followed by a one-letter argument, then a whitespace, as shown in the example below::
 
 -b <path_to_bed_file>
 
-**or** as long-option with double-hyphen and one equal sign::
+**or** via the long-option format with double-hyphen and one equals sign::
 
 --bed_file=<path_to_bed_file>
 
@@ -92,7 +92,7 @@ All of the listed data are mandatory for STARE to work. You will find examples f
 Other input options
 ===============
 
-There are more tunable options for STARE, some of which will be explained in more detail below the table, marked with a :sup:`*`. Those flags that are *required* when running the ABC-mode are labelled accordingly. If you miss one, STARE should notice and tell you.
+There are more tunable options for STARE, some of which will be explained in more detail below the table, marked with an asterisk :sup:`*`. Those flags that are *required* when running the ABC-mode are labelled accordingly. If you miss one, STARE should notice and tell you.
 
 .. csv-table:: 
    :header: "Flag", "Description"
@@ -189,21 +189,4 @@ Contact
 ***************
 Suggestions, problems, ideas for additional functionality? Don't hesitate to open an `issue on GitHub <https://github.com/SchulzLab/STARE/issues>`_.
 
-***************
-References
-***************
 
-We will soon provide a preprint paper about STARE and its implementation, including application examples. Up to this point, note that STARE is a combination and adaptation based on:
-
-- Fulco CP, Nasser J, Jones TR, Munson G, Bergman DT, Subramanian V, Grossman SR, Anyoha R, Doughty BR, Patwardhan TA, Nguyen TH, Kane M, Perez EM, Durand NC, Lareau CA, Stamenova EK, Aiden EL, Lander ES & Engreitz JM. Activity-by-contact model of enhancer–promoter regulation from thousands of CRISPR perturbations. Nat. Genet. 51, 1664–1669 (2019). (https://www.nature.com/articles/s41588-019-0538-0)
-	 - https://github.com/broadinstitute/ABC-Enhancer-Gene-Prediction
-- Combining transcription factor binding affinities with open-chromatin data for accurate gene expression prediction Schmidt et al., Nucleic Acids Research 2016; doi: 10.1093/nar/gkw1061
-	 - https://github.com/schulzlab/tepic
-- Roider, H. G., A. Kanhere, T. Manke, and M. Vingron. “Predicting Transcription Factor Affinities to DNA from a Biophysical Model.” Bioinformatics 23, no. 2 (January 15, 2007): 134–41. https://doi.org/10.1093/bioinformatics/btl565.
-
-
-The results of our analyses are available via Zenodo.
-
-.. image:: https://zenodo.org/badge/DOI/10.5281/zenodo.5841992.svg
-  :alt: STARE_ABC_Tables
-  :target: https://doi.org/10.5281/zenodo.5841991

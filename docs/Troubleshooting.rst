@@ -18,4 +18,4 @@ Almost all files are gzipped by STARE. If you decompress a file and remove the c
 
 Still not working?
 ******************
-If you still have trouble getting STARE running, open an `issue on GitHub <https://github.com/SchulzLab/STARE/issues>`_ and we can try to solve it together.
+If you still have trouble getting STARE running, open an `issue on GitHub <https://github.com/SchulzLab/STARE/issues>`_ and we can try to solve it together. Also don't hesitate to open an issue if you have suggestions, feedback or ideas for STARE.
