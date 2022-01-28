@@ -1,6 +1,8 @@
 working_dir=$(cd "$(dirname "$0")" && pwd -P)
 
+echo "Compiling formatting scripts"
 g++ "$working_dir"/ReplaceInvalidChars.cpp -std=c++11 -O3 -o "$working_dir"/ReplaceInvalidChars
+g++ "$working_dir"/PSCM_to_PSEM.cpp -std=c++11 -o "$working_dir"/PSCM_to_PSEM
 echo "Compiling TRAP"
 g++ "$working_dir"/TRAPmulti.cpp -fopenmp -std=c++11 -O3 -o "$working_dir"/TRAPmulti
 echo "Compiling ABC scoring"

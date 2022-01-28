@@ -40,10 +40,16 @@ int main(int argc, char **argv) {
     // ____________________________________________________________
     // FETCH AND CHECK INPUT ARGS
     // ____________________________________________________________
-    string parameter_help = "-a gene annotation file\n-b bed file with open chromatin regions"
-                            "\n-n column(s) with the activity of regions in the -b file\n-i TF-region affinity file from TRAP"
-                            "\n-o prefix of the output files\n-p PSEM file \n-w window size around TSS (default 50kb)"
-                            "\n-e decay (default true)\n-c number of cores\n-abc path to the ABC-scoring output, if available, otherwise set to 0\n";
+    string parameter_help = "-a gene annotation file"
+                            "\n-b bed file with open chromatin regions"
+                            "\n-n column(s) with the activity of regions in the -b file"
+                            "\n-i TF-region affinity file from TRAP"
+                            "\n-o prefix of the output files"
+                            "\n-p PSEM file"
+                            "\n-w window size around TSS (default 50kb)"
+                            "\n-e decay (default true)"
+                            "\n-c number of cores"
+                            "\n-abc path to the ABC-scoring output, if available, otherwise set to 0\n";
 
     vector <string> h_flags = {"h", "-h", "--h", "help", "-help", "--help"};
     for (int i = 1; i < argc; ++i) {
@@ -261,8 +267,7 @@ int main(int argc, char **argv) {
     // ____________________________________________________________
     // GET SCALING COLS - if specified
     // ____________________________________________________________
-    int start_col = 0;
-    int last_col = 0;
+    vector<int> col_indices;
     if (n_scalingcol != "0") {
         // Look into the peakfile to see with how many columns/files we are dealing with.
         ifstream peek_peak(b_scalingfile);
@@ -273,23 +278,32 @@ int main(int argc, char **argv) {
                 int total_cols = SplitTabLine(line_peek).size();
                 if (n_scalingcol.find('-') != string::npos) {
                     int hyphon_pos = n_scalingcol.find("-", 0);
-                    start_col = stoi(n_scalingcol.substr(0, hyphon_pos)) - 1;
-                    last_col = stoi(n_scalingcol.substr(hyphon_pos + 1)) - 1;
+                    for (int i=stoi(n_scalingcol.substr(0, hyphon_pos)) - 1; i <= stoi(n_scalingcol.substr(hyphon_pos + 1)) - 1; i++) {
+                        col_indices.push_back(i);
+                    }
                 } else if (n_scalingcol.find('+') != string::npos) {
-                    start_col = stoi(n_scalingcol.substr(0, n_scalingcol.find('+', 0))) - 1;
-                    last_col = total_cols - 1;
+                    for (int i=stoi(n_scalingcol.substr(0, n_scalingcol.find('+', 0))) - 1; i <= total_cols-1; i++) {
+                        col_indices.push_back(i);
+                    }
+                } else if (n_scalingcol.find(',') != string::npos) {
+                    stringstream find_cols(n_scalingcol);
+                    string curr_val;
+                    while (getline(find_cols, curr_val, ',')) {
+                        if (stoi(curr_val) > 0 and stoi(curr_val) <= total_cols) {
+                            col_indices.push_back(stoi(curr_val) - 1);
+                        }
+                    }
                 } else {
-                    start_col = stoi(n_scalingcol) - 1;
-                    last_col = start_col;
+                    col_indices.push_back(stoi(n_scalingcol) - 1);
                 }
                 break;
             }
         }
     }
+    unordered_map<int, string> colname_map = FileHeaderMapping(b_scalingfile, col_indices);
 
-    unordered_map<int, string> colname_map = FileHeaderMapping(b_scalingfile, start_col, last_col);
     // Stores the intergenic score of region-gene interactions.
-     unordered_map <string, unordered_map<int, double>> interaction_scores;
+    unordered_map <string, unordered_map<int, double>> interaction_scores;
     bool use_abc_scoring = false;
     if ((abc_abc_output != "False") and (abc_abc_output != "FALSE") and (abc_abc_output != "false") and
         (abc_abc_output != "0") and (abc_abc_output.size() > 1)) {
@@ -304,13 +318,13 @@ int main(int argc, char **argv) {
         // the affinities, instead of the distance decay.
         // Fetch all ABC-scoring files.
         vector<string> abc_files;
-        if (start_col == last_col and ifstream(abc_abc_output).is_open()) {
+        if (col_indices.size() == 1 and ifstream(abc_abc_output).is_open()) {
             abc_files = {abc_abc_output};
         }
         else {
             int col_suffix_pos;
             smatch re_col_match;
-            for (int a_col = start_col; a_col <= last_col; a_col++) {
+            for (int a_col : col_indices) {
                 regex re_col("_c[0-9]+.txt.gz"); // First try to find cN.
                 regex_search(abc_abc_output, re_col_match, re_col);
                 if (re_col_match.size() > 0) {
@@ -451,7 +465,7 @@ int main(int argc, char **argv) {
                     chr = chr.substr(3);
                 }
                 vector<double> scaling_vector;
-                for (int c = start_col; c < last_col + 1; ++c) {
+                for (int c : col_indices) {
                     scaling_vector.push_back(stod(columns[c]));
                 }
                 region_affinities[chr + ":" + columns[1] + "-" + columns[2]][1] = scaling_vector;
@@ -469,10 +483,14 @@ int main(int argc, char **argv) {
     }
     // Write one output file for each activity column.
     cout << "Summarize the region affinities on gene level." << endl;
-    for (int c = 0; c < (last_col + 1) - start_col; ++c) {
+    int out_iters = 1;  // At least once, even if no activity column was specified.
+    if (col_indices.size() > 0) {  // If we have activity columns, write as many outputs.
+        out_iters = col_indices.size();
+    }
+    for (int c = 0; c < out_iters; ++c) {
         string column_suffix = "";
         if (n_scalingcol != "0") {
-            column_suffix = colname_map[c + start_col];
+            column_suffix = colname_map[col_indices[c]];
         }
         cout << "Starting activity column " << column_suffix << endl;
         // Allocate as vector so that each gene's affinities is at the same index as it's ID in candidate_genes.

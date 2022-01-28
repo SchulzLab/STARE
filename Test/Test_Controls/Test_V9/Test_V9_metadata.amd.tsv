@@ -1,34 +1,35 @@
 [Description]
 process	STARE0.1
 run_by_user	dennis
-date	01_14_22
-time	16_05_23_N
-analysis_id	Test/Test_V9/Test_V9
+date	01_27_22
+time	16_54_15_N
+analysis_id	/Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Code/../Test//Test_V9/Test_V9
+
+[Command]
+STARE.sh -g /Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Code/../Test//Test_Data/example_sequence_chr21part.fa -b /Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Code/../Test//Test_Data/ABC_example_regions.bed -o /Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Code/../Test//Test_V9 -p /Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Code/../PWMs/2.0/human_jaspar_hoc_kellis.PSEM -a /Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Code/../Test//Test_Data/ABC_example_annotation.gtf -w 500000 -n 4+ -t 0 -f /Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Code/../Test//Test_Data/ABC_example_HiCFiles/ -k 5000 -t 0 -q False
 
 [Inputs]
-region_file	Test/Test_Data/ABC_example_regions.bed
+region_file	/Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Code/../Test//Test_Data/ABC_example_regions.bed
 signal_column	4+
 
 [References]
-genome_reference	Test/Test_Data/example_sequence_chr21part.fa
-pwms	PWMs/2.0/human_jaspar_hoc_kellis.PSEM
-genome_annotation	Test/Test_Data/ABC_example_annotation.gtf
+genome_reference	/Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Code/../Test//Test_Data/example_sequence_chr21part.fa
+psems	/Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Code/../PWMs/2.0/human_jaspar_hoc_kellis.PSEM
+genome_annotation	/Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Code/../Test//Test_Data/ABC_example_annotation.gtf
 
 [Output path]
-Test/Test_V9
+/Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Code/../Test//Test_V9
 
 [Parameters]
-SampleID	Test/Test_V9
 cores	1
-chr prefix	TRUE
 window	500000
-path with hi-c contact files	Test/Test_Data/ABC_example_HiCFiles/
+path with hi-c contact files	/Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Code/../Test//Test_Data/ABC_example_HiCFiles/
 bin size of hi-c contacts	5000
 ABC-score cut-off	0
 Use pseudocount for contact frequency	TRUE
-Use adjustedABC version	FALSE
-Window size for the adjustedABC	5000000
+Use adaptedABC version	FALSE
+Window size for the adaptedABC	5000000
 
 [Metrics]
 Number of provided regions	7
-Number of considered pwms	     726
+Number of considered psems	     726

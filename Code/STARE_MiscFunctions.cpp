@@ -140,7 +140,7 @@ void GzipFile(std::string file) {
     }
 }
 
-std::unordered_map<int, std::string> FileHeaderMapping(std::string file_name, int first_col, int last_col) {
+std::unordered_map<int, std::string> FileHeaderMapping(std::string file_name, std::vector<int> col_indices) {
 // Reads the file header and creates a map based on the column names. Header has to start with #, otherwise columns
 // will be named cN.
     std::unordered_map<int, std::string> header_map;
@@ -149,7 +149,7 @@ std::unordered_map<int, std::string> FileHeaderMapping(std::string file_name, in
     getline(header_read, line_peek);
     if (line_peek.substr(0, 1) == "#") {
         std::vector<std::string> col_names = SplitTabLine(line_peek);
-        for (int c = first_col; c <= last_col; c++) {
+        for (int c : col_indices) {
             std::string non_whitespace = col_names[c];  // To remove any potential # from the header.
             std::replace(non_whitespace.begin(), non_whitespace.end(), ' ', '_');
             if (non_whitespace.size() > 0) {  // We can't work with empty strings.
@@ -161,7 +161,7 @@ std::unordered_map<int, std::string> FileHeaderMapping(std::string file_name, in
         }
     }
     else {
-        for (int c = first_col; c <= last_col; c++) {
+        for (int c : col_indices) {
             header_map[c] = "_c" + std::to_string(c + 1);  // 1-based counting for the suffixes.
         }
     }

@@ -69,7 +69,7 @@ int main(int argc, char **argv) {
                             "\n-c number of cores used (default 1)"
                             "\n-x file with regions to be excluded"
                             "\n-p whether to use pseudocount for contact frequency (default True)"
-                            "\n-q whether to adjust the activity for an enhancer's contacts (default True)"
+                            "\n-q whether to adapt the activity for an enhancer's contacts (default True)"
                             "\n-m enhancer window size in which to consider contacts for adjustment";
 
     vector <string> h_flags = {"h", "-h", "--h", "help", "-help", "--help"};
@@ -85,28 +85,28 @@ int main(int argc, char **argv) {
     }
 
     // Reading the input args:
-    string b_peakfile, a_promoterfile, n_activitycol, gw_genewindowsize, bin_binsize, t_abc_cutoff, cf_contactfolder,
-            c_cores, d_prefix, x_exclude_regions, p_pseudocount, q_adjusted_abc, m_enhwindowsize;
+    string b_peakfile, a_promoterfile, n_activitycol, w_genewindowsize, k_binsize, t_abc_cutoff, f_contactfolder,
+            c_cores, o_prefix, x_exclude_regions, d_pseudocount, q_adjusted_abc, m_enhwindowsize;
     static struct option long_options[] =
             {
                     {"b",   required_argument, NULL, 'b'},
                     {"a",   required_argument, NULL, 'a'},
                     {"n",   required_argument, NULL, 'n'},
-                    {"gw",  required_argument, NULL, 'w'},
-                    {"bin", required_argument, NULL, 'i'},
+                    {"w",  required_argument, NULL, 'w'},
+                    {"k", required_argument, NULL, 'k'},
                     {"t",   required_argument, NULL, 't'},
-                    {"cf",  required_argument, NULL, 'f'},
+                    {"f",  required_argument, NULL, 'f'},
                     {"c",   required_argument, NULL, 'c'},
-                    {"d",   required_argument, NULL, 'd'},
+                    {"o",   required_argument, NULL, 'o'},
                     {"x",   required_argument, NULL, 'x'},
-                    {"p",   required_argument, NULL, 'p'},
+                    {"d",   required_argument, NULL, 'd'},
                     {"q",   required_argument, NULL, 'q'},
                     {"m",   required_argument, NULL, 'm'},
                     {NULL,  0,                 NULL, 0}
             };
 
     int arg;
-    while ((arg = getopt_long_only(argc, argv, "b:a:n:w:i:t:c:f:d:x:p:h:m:", long_options, NULL)) != -1) {
+    while ((arg = getopt_long_only(argc, argv, "b:a:n:w:k:t:c:f:o:x:d:h:q:m:", long_options, NULL)) != -1) {
         switch (arg) {
             case 'b':
                 b_peakfile = optarg;
@@ -118,28 +118,28 @@ int main(int argc, char **argv) {
                 n_activitycol = optarg;
                 break;
             case 'w':
-                gw_genewindowsize = optarg;
+                w_genewindowsize = optarg;
                 break;
-            case 'i':
-                bin_binsize = optarg;
+            case 'k':
+                k_binsize = optarg;
                 break;
             case 't':
                 t_abc_cutoff = optarg;
                 break;
             case 'f':
-                cf_contactfolder = optarg;
+                f_contactfolder = optarg;
                 break;
             case 'c':
                 c_cores = optarg;
                 break;
-            case 'd':
-                d_prefix = optarg;
+            case 'o':
+                o_prefix = optarg;
                 break;
             case 'x':
                 x_exclude_regions = optarg;
                 break;
-            case 'p':
-                p_pseudocount = optarg;
+            case 'd':
+                d_pseudocount = optarg;
                 break;
             case 'q':
                 q_adjusted_abc = optarg;
@@ -155,7 +155,7 @@ int main(int argc, char **argv) {
     }
 
     // Check if there is an argument for each parameter.
-    for (string p: {b_peakfile, a_promoterfile, cf_contactfolder, d_prefix}) {
+    for (string p: {b_peakfile, a_promoterfile, f_contactfolder, o_prefix}) {
         if (p.size() < 1) {
             cout << "Required parameter missing" << endl;
             cout << parameter_help << endl;
@@ -164,16 +164,16 @@ int main(int argc, char **argv) {
     }
 
     // If not given as input, set to default.
-    int gene_windowsize = stoi(SetOptionalInput(gw_genewindowsize, "5000000")) / 2;
-    int bin_size = stoi(SetOptionalInput(bin_binsize, "5000"));
+    int gene_windowsize = stoi(SetOptionalInput(w_genewindowsize, "5000000")) / 2;
+    int bin_size = stoi(SetOptionalInput(k_binsize, "5000"));
     string activity_col = SetOptionalInput(n_activitycol, "4");
     int cores = stoi(SetOptionalInput(c_cores, "1"));
     double abc_cutoff = stof(SetOptionalInput(t_abc_cutoff, "0.02"));
-    bool do_pseudocount = SetBoolInput(p_pseudocount, true);
+    bool do_pseudocount = SetBoolInput(d_pseudocount, true);
     int enh_windowsize = stoi(SetOptionalInput(m_enhwindowsize, "5000000")) / 2;
     bool do_adjusted_abc = SetBoolInput(q_adjusted_abc, true);
 
-    string activity_header = "adjustedActivity";
+    string activity_header = "adaptedActivity";
     int intergenic_activity_col = 3;  // Vector-index where the contact-adjusted activity is stored.
     if (not do_adjusted_abc) {
         enh_windowsize = gene_windowsize;
@@ -262,7 +262,7 @@ int main(int argc, char **argv) {
     string line_peek;
     string peak_chr_prefix = "";
     bool has_chr_prefix = false;
-    int start_col, last_col;
+    vector<int> col_indices;  // Store the activity column indices.
     int peak_file_rowlen;
     while (!peek_peak.eof()) {
         getline(peek_peak, line_peek);
@@ -278,27 +278,36 @@ int main(int argc, char **argv) {
             }
             if (activity_col.find('-') != string::npos) {
                 int hyphon_pos = activity_col.find("-", 0);
-                start_col = stoi(activity_col.substr(0, hyphon_pos)) - 1;
-                last_col = stoi(activity_col.substr(hyphon_pos + 1)) - 1;
+                for (int i=stoi(activity_col.substr(0, hyphon_pos)) - 1; i <= stoi(activity_col.substr(hyphon_pos + 1)) - 1; i++) {
+                    col_indices.push_back(i);
+                }
             } else if (activity_col.find('+') != string::npos) {
-                start_col = stoi(activity_col.substr(0, activity_col.find('+', 0))) - 1;
-                last_col = total_cols - 1;
+                for (int i=stoi(activity_col.substr(0, activity_col.find('+', 0))) - 1; i <= total_cols-1; i++) {
+                    col_indices.push_back(i);
+                }
+            } else if (activity_col.find(',') != string::npos) {
+                stringstream find_cols(activity_col);
+                string curr_val;
+                while (getline(find_cols, curr_val, ',')) {
+                    if (stoi(curr_val) > 0 and stoi(curr_val) <= total_cols) {
+                        col_indices.push_back(stoi(curr_val) - 1);
+                    }
+                }
             } else {
-                start_col = stoi(activity_col) - 1;
-                last_col = start_col;
+                col_indices.push_back(stoi(activity_col) - 1);
             }
             break;
         }
     }
-    int col_num = last_col - start_col;  // Total number of activity columns to iterate through.
-    unordered_map<int, string> colname_map = FileHeaderMapping(b_peakfile, start_col, last_col);
+    int col_num = col_indices.size();  // Total number of activity columns to iterate through.
+    unordered_map<int, string> colname_map = FileHeaderMapping(b_peakfile, col_indices);
 
     // Is not written directly on gtf-file read, as we need to find the most 5'-TSS first.
     int intersect_window = gene_windowsize;
     if (enh_windowsize > gene_windowsize) {
         intersect_window = enh_windowsize;
     }
-    string temp_window_file = d_prefix + "_ABCpp_Temp_GeneWindow.bed";
+    string temp_window_file = o_prefix + "_ABCpp_Temp_GeneWindow.bed";
     ofstream window_out(temp_window_file);
     Test_outfile(window_out, temp_window_file);
     for (auto const &gene : promoter_map) {  // [geneID]: ID, name, chr, TSS.
@@ -394,7 +403,7 @@ int main(int argc, char **argv) {
                 this_peak.start = peak_start;
                 this_peak.end = peak_end;
                 vector<double> activities;
-                for (int a_col = start_col; a_col <= last_col; a_col++) {
+                for (int a_col : col_indices) {
                     activities.push_back(stof(columns[a_col + 4]));
                 }
                 this_peak.signal = activities;
@@ -427,17 +436,17 @@ int main(int argc, char **argv) {
     // Open output files already, as well as the GeneInfo files.
     vector<ofstream> out_streams;
     vector<ofstream> gene_info_streams;
-    for (int a_col = 0; a_col <= col_num; a_col++) {
-        string column_suffix = colname_map[a_col + start_col];
+    for (int a_col = 0; a_col < col_num; a_col++) {
+        string column_suffix = colname_map[col_indices[a_col]];
         // Open the output and write the header already. Only the first string has to be explicitly casted.
-        ofstream abc_output(d_prefix + "_ABCpp_scoredInteractions" + column_suffix + ".txt");
-        Test_outfile(abc_output, d_prefix + "_ABCpp_scoredInteractions" + column_suffix + ".txt");
-        abc_output << string("#chr") + "\t" + "Peak_Start" + "\t" + "Peak_End" + "\t" + "Ensembl ID" + "\t" + "Gene Name" +
+        ofstream abc_output(o_prefix + "_ABCpp_scoredInteractions" + column_suffix + ".txt");
+        Test_outfile(abc_output, o_prefix + "_ABCpp_scoredInteractions" + column_suffix + ".txt");
+        abc_output << string("#chr") + "\t" + "start" + "\t" + "end" + "\t" + "Ensembl ID" + "\t" + "Gene Name" +
                       "\t" + "PeakID" + "\t" + "signalValue" + "\t" + "Contact" + "\t" + activity_header + "\t" +
                       "scaledContact" + "\t" + "intergenicScore" + "\t" + "TSS-dist" + "\t" + "ABC-Score" + "\n";
         out_streams.push_back(move(abc_output));
         // Also already write the GeneInfo header.
-        ofstream gene_info_out(d_prefix + "_GeneInfo" + column_suffix + ".txt");
+        ofstream gene_info_out(o_prefix + "_GeneInfo" + column_suffix + ".txt");
         gene_info_out << string("Ensembl ID") + "\t" + "Gene Name" + "\t" + "chr" + "\t" + "TSS" + "\t" + "#Enhancer"
                          + "\t" + "Avg_EnhancerActivity" + "\t" + "Avg_EnhancerContact" + "\t" + "Avg_EnhancerDistance" + "\t" + "Failure" + "\n";
         gene_info_streams.push_back(move(gene_info_out));
@@ -447,11 +456,11 @@ int main(int argc, char **argv) {
     // ITERATE THROUGH THE CHROMOSOMES
     // ____________________________________________________________
     // First see which contact files are available.
-    string ls_out = GetStdoutFromCommand("ls " + cf_contactfolder + "/");
+    string ls_out = GetStdoutFromCommand("ls " + f_contactfolder + "/");
     vector <string> contact_files;
     istringstream read_ls_out(ls_out);
     if (!read_ls_out) {
-        cout << "ERROR Could not access the folder with the contact files, command was the following:\nls " + cf_contactfolder + "/"
+        cout << "ERROR Could not access the folder with the contact files, command was the following:\nls " + f_contactfolder + "/"
              << endl;
         return 1;
     }
@@ -486,7 +495,7 @@ int main(int argc, char **argv) {
         auto start_hic = chrono::high_resolution_clock::now();
         // Check in the first line of the file if there is an integer present. If the zcat returns an error, it will be
         // a character at the first position as well.
-        string peek_cmd = string("zcat < ") + cf_contactfolder + "/" + chr_file + " 2>&1 | head -n 1";
+        string peek_cmd = string("zcat < ") + f_contactfolder + "/" + chr_file + " 2>&1 | head -n 1";
         FILE *peek_stream = popen(peek_cmd.c_str(), "r");
         char dummy[256];
         regex int_match("[0-9]");
@@ -503,7 +512,7 @@ int main(int argc, char **argv) {
             continue;
         }
 
-        string hic_cmd = string("zcat < ") + cf_contactfolder + "/" + chr_file + " 2>&1";
+        string hic_cmd = string("zcat < ") + f_contactfolder + "/" + chr_file + " 2>&1";
         FILE *hic_stream = popen(hic_cmd.c_str(), "r");
 
         // ____________________________________________________________
@@ -654,19 +663,19 @@ int main(int argc, char **argv) {
             }
             // Contact | scaledContact | + activity_cols x (SignalValue | scaled/adjustedActivity | ABC-Score)
             vector <vector<double>> candidate_scores(num_candidates,
-                                                     vector<double>(2 + 3 * (col_num + 1)));
+                                                     vector<double>(2 + 3 * (col_num)));
             vector <string> candidate_interactions(num_candidates);
-            vector<double> max_signals(col_num + 1);
+            vector<double> max_signals(col_num);
             double max_contact = 0;
             int peak_count_helper = 0;
-            vector<double> abc_sums(col_num + 1);
+            vector<double> abc_sums(col_num);
             for (string peak_id : gene_peak_map[chr_gene]) {
                 auto matching_peak = peak_info_map[peak_id];  // TODO reference not copy
                 double current_contact = gene_contact_map[chr_gene][peak_count_helper];
                 if (current_contact > max_contact) {
                     max_contact = current_contact;
                 }
-                for (int a_col = 0; a_col <= col_num; a_col++) {
+                for (int a_col = 0; a_col < col_num; a_col++) {
                     double current_activity = matching_peak.signal[a_col];
                     candidate_scores[peak_count_helper][2 + a_col * 3] = current_activity;
                     if (do_adjusted_abc) {
@@ -692,7 +701,7 @@ int main(int argc, char **argv) {
             for (int r = 0; r < peak_count_helper; ++r) {
                 bool exceeds = false;
                 candidate_scores[r][1] = candidate_scores[r][0] * contact_rescaler;  // Rescale the contact.
-                for (int a_col = 0; a_col <= col_num; a_col++) {
+                for (int a_col = 0; a_col < col_num; a_col++) {
                     double this_sum = abc_sums[a_col];
                     if (this_sum != 0) {
                         double this_score = (candidate_scores[r][0] * candidate_scores[r][3 + a_col * 3]) / this_sum;
@@ -720,7 +729,7 @@ int main(int argc, char **argv) {
 #pragma omp critical(out_writer)  // Allows only one thread to write to output files at the same time.
             {
                 // Rows: activity columns and columns: #Enhancer|EnhancerActivity|EnhancerContact|EnhancerDistance.
-                vector<vector<double>> gene_info(col_num + 1, vector<double>(4));
+                vector<vector<double>> gene_info(col_num, vector<double>(4));
 
                 // Repeat the process for each activity column.
                 for (int i = 0; i < score_fetcher_floats.size(); ++i) {
@@ -732,7 +741,7 @@ int main(int argc, char **argv) {
                     auto gene_map = promoter_map[gene_id];
 
                     auto matching_peak = peak_info_map[interaction.substr(interaction.find("*") + 1)];
-                    for (int a_col = 0; a_col <= col_num; a_col++) {
+                    for (int a_col = 0; a_col < col_num; a_col++) {
                         if (row_floats[4 + a_col * 3] >= abc_cutoff) {  // Check again, it's present if only one exceeds.
                             out_streams[a_col] << gene_map[2] + "\t" + to_string(matching_peak.start) + "\t" +
                                                   to_string(matching_peak.end);
@@ -765,7 +774,7 @@ int main(int argc, char **argv) {
                     // If there is a new gene next write to GeneInfo and reset.
                     if (interaction_tracker[i+1].substr(0, interaction_tracker[i+1].find("*")) != gene_id) {
                         written_genes.insert(gene_id);
-                        for (int a_col = 0; a_col <= col_num; a_col++) {
+                        for (int a_col = 0; a_col < col_num; a_col++) {
                             gene_info_streams[a_col] << gene_id + "\t" + gene_map[1] + "\t" + gene_map[2] + "\t" + gene_map[3];
                             int num_enhancer = static_cast<int>(gene_info[a_col][0]);
                             if (num_enhancer > 0) {
@@ -804,7 +813,7 @@ int main(int argc, char **argv) {
             }
         }
         if (fail_message.size() > 0) {
-            for (int a_col = 0; a_col <= col_num; a_col++) {
+            for (int a_col = 0; a_col < col_num; a_col++) {
                 gene_info_streams[a_col] << gene_id + "\t" + gene_map[1] + "\t" + gene_map[2] + "\t" + gene_map[3] +
                                             "\t0\t0\t0\t0\t" + fail_message + "\n";
             }
@@ -813,12 +822,12 @@ int main(int argc, char **argv) {
     // Gzip all output files.
     cout << "Compressing files" << endl;
 #pragma omp parallel for num_threads(cores)
-    for (int a_col = 0; a_col <= col_num; a_col++) {  // Iterate through a_cols to have the correct suffix.
-        string column_suffix = colname_map[a_col + start_col];
+    for (int a_col=0; a_col < col_num; a_col++) {  // Iterate through a_cols to have the correct suffix.
+        string column_suffix = colname_map[col_indices[a_col]];
         out_streams[a_col].close();
-        GzipFile(d_prefix + "_ABCpp_scoredInteractions" + column_suffix + ".txt");
+        GzipFile(o_prefix + "_ABCpp_scoredInteractions" + column_suffix + ".txt");
         gene_info_streams[a_col].close();
-        GzipFile(d_prefix + "_GeneInfo" + column_suffix + ".txt");
+        GzipFile(o_prefix + "_GeneInfo" + column_suffix + ".txt");
     }
     auto stop0 = chrono::high_resolution_clock::now();
     auto duration0 = chrono::duration_cast<chrono::seconds>(stop0 - start0);

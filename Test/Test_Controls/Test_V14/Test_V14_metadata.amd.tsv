@@ -1,0 +1,32 @@
+[Description]
+process	STARE0.1
+run_by_user	dennis
+date	01_27_22
+time	16_54_31_N
+analysis_id	/Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Code/../Test//Test_V14/Test_V14
+
+[Command]
+STARE.sh -g /Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Code/../Test//Test_Data/example_sequence.fa -b /Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Code/../Test//Test_Data/example_regions.bed -o /Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Code/../Test//Test_V14 -s /Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Code/../Test//Test_Data/Jaspar_transfac.txt -y 0.41 -a /Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Code/../Test//Test_Data/example_annotation.gtf -w 3000 -x /Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Code/../Test//Test_Data/example_exclude_regions.bed
+
+[Inputs]
+region_file	/Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Code/../Test//Test_Data/example_regions.bed
+signal_column	0
+excluded regions	/Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Code/../Test//Test_Data/example_exclude_regions.bed
+
+[References]
+genome_reference	/Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Code/../Test//Test_Data/example_sequence.fa
+pscms	/Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Code/../Test//Test_Data/Jaspar_transfac.txt
+CG-content	0.41
+genome_annotation	/Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Code/../Test//Test_Data/example_annotation.gtf
+
+[Output path]
+/Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Code/../Test//Test_V14
+
+[Parameters]
+cores	1
+window	3000
+decay	TRUE
+
+[Metrics]
+Number of provided regions	7
+Number of considered psems	     746

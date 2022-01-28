@@ -38,6 +38,6 @@ void Test_outfile(std::ofstream &out_file, std::string out_path);
 
 void GzipFile(std::string file);
 
-std::unordered_map<int, std::string> FileHeaderMapping(std::string file_name, int first_col, int last_col);
+std::unordered_map<int, std::string> FileHeaderMapping(std::string file_name, std::vector<int>);
 
 #endif //STARE_MISCFUNCTIONS_H
