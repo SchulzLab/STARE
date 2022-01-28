@@ -1,5 +1,5 @@
 ============
-STARE - Look into TF regulation on gene level leveraging an adapted Activity-By-Contact score
+STARE
 ============
 
 STARE is a framework that combines two tasks, which can also work independently:
@@ -39,7 +39,7 @@ Get started and test runs
 *************
 The following schema should give you an overview of STARE's function and what settings you can tune to run it properly on your data. 
 
-.. image:: /Figures/STARE_FlowBig.png
+.. image:: ../Figures/STARE_FlowBig.png
   :alt: STARE_overview
 
 
@@ -161,7 +161,7 @@ ABC output
 
 You will get two files for each activity column you gave, one with all the interactions surpassing the set cut-off -t, and one summarising a variety of features for each gene. See the description of the columns below.
 
-.. image:: /Figures/STARE_ABCOutput_Tables.png
+.. image:: ../Figures/STARE_ABCOutput_Tables.png
   :alt: STARE_ABC_Tables
 
 
