@@ -62,7 +62,7 @@ Input and options
 
 There are two ways to set the flags for STARE.
 
-Either hyphen immediately followed by a one-letter argument, then a whitespace, as shown in the example below::
+Either with a hyphen immediately followed by a one-letter argument, then a whitespace, as shown in the example below::
 
 -b <path_to_bed_file>
 
@@ -76,7 +76,7 @@ Do not mix those styles, that won't work. You will notice that the one-character
 Required input
 ===============
 
-All of the listed data are mandatory for STARE to work. You will find examples for each in **/Test/Test_Data/**.
+The table below provides the list of all input data (together with their corresponding arguments) that are mandatory. You will find examples for each in **/Test/Test_Data/**.
 
 .. csv-table:: 
    :header: "Flag", "Description"

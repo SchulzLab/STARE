@@ -2,7 +2,11 @@
 References
 ***************
 
-You can find our preprint about STARE and its implementation on `bioRxiv <https://doi.org/10.1101/2022.01.28.478202>`_. The results of our analyses are available via Zenodo.
+You can find our preprint about STARE and its implementation on bioRxiv:
+
+Hecker, Dennis, Fatemeh Behjati Ardakani, and Marcel H. Schulz. “The Adapted Activity-By-Contact-Model for Enhancer-Gene Assignment and Its Combination with Transcription Factor Affinities in Single Cell Data.” Preprint. Bioinformatics, January 28, 2022. https://doi.org/10.1101/2022.01.28.478202.
+
+The results of our analyses are available via Zenodo.
 
 .. image:: https://zenodo.org/badge/DOI/10.5281/zenodo.5841992.svg
   :alt: ZenodoBadge
