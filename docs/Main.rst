@@ -76,7 +76,7 @@ Do not mix those styles, that won't work. You will notice that the one-character
 Required input
 ===============
 
-The table below provides the list of all input data (together with their corresponding arguments) that are mandatory. You will find examples for each in **/Test/Test_Data/**.
+All of the listed data are mandatory for STARE to work. You will find examples for each in **/Test/Test_Data/**.
 
 .. csv-table:: 
    :header: "Flag", "Description"
@@ -183,6 +183,5 @@ Output per activity column (-n)
 ===============
 
 You will get one set of output files for each activity column. The files will be named according to the header of those columns, or according to their index, if you didn't have a header. For example, if one of your activity columns was named *sirup*, your gene-TF matrix file would be *Pancake_TF_Gene_Affinities_sirup.txt.gz*.
-
 
 

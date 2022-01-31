@@ -4,7 +4,7 @@ PSEMs and PSCMs
 
 The TF affinities are calculated with `TRAP <https://doi.org/10.1093/bioinformatics/btl565>`_. TRAP is motif based and requires Position Specific Energy Matrices (PSEMs). They represent the mismatch energy of a given motif. The authors of TRAP provide a tool which converts Position Specific Count Matrices (PSCMs) to PSEMs. We provide a collection of PSEMs for different species, which you can find at https://github.com/SchulzLab/STARE/tree/main/PWMs. In the directory **1.0/** you find the converted PSEMs of vertebrate TFs. In **2.0** there are two files for each species, one with a collection from different databases *'_all'*, and one where the redundant ones were removed. In **2.1/** there are merged and clustered collections of PSEMs. The original PSCMs were collected from:
 
-- `JASPAR <https://jaspar.genereg.net/>`_,: Sandelin, A. “JASPAR: An Open-Access Database for Eukaryotic Transcription Factor Binding Profiles.” Nucleic Acids Research 32, no. 90001 (January 1, 2004): 91D – 94. https://doi.org/10.1093/nar/gkh012.
+- `JASPAR <https://jaspar.genereg.net/>`_: Sandelin, A. “JASPAR: An Open-Access Database for Eukaryotic Transcription Factor Binding Profiles.” Nucleic Acids Research 32, no. 90001 (January 1, 2004): 91D – 94. https://doi.org/10.1093/nar/gkh012.
 
 - `HOCOMOCO <https://hocomoco11.autosome.ru/>`_ : Kulakovskiy, Ivan V., Yulia A. Medvedeva, Ulf Schaefer, Artem S. Kasianov, Ilya E. Vorontsov, Vladimir B. Bajic, and Vsevolod J. Makeev. “HOCOMOCO: A Comprehensive Collection of Human Transcription Factor Binding Sites Models.” Nucleic Acids Research 41, no. D1 (January 1, 2013): D195–202. https://doi.org/10.1093/nar/gks1089.
 
