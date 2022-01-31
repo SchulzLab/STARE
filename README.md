@@ -17,7 +17,7 @@ Those two parts are combined to summarise TF affinities on gene level, which all
 
 # References
 
-STARE and its application are described in our ![preprint on bioRxiv](https://doi.org/10.1101/2022.01.28.478202). The results of our analyses are available via [Zenodo](https://doi.org/10.5281/zenodo.5841991).
+STARE and its application are described in our [preprint on bioRxiv](https://doi.org/10.1101/2022.01.28.478202). The results of our analyses are available via [Zenodo](https://doi.org/10.5281/zenodo.5841991).
 
 The framework is a combination and adaptation which is based on:
 
