@@ -8,6 +8,10 @@ Index of activity columns
 ******************
 Make sure that all the columns you gave with the -n flags actually exist and that you start counting at 1. Otherwise it might cause an index error, C++ will call a segmentation fault.
 
+Header in bed-files
+******************
+Header are allowed in bed-files, and also encouraged to label the activity columns, but they must be preceeded by a number sign '#'. Otherwise, bedtools will fail to work.
+
 The *chr* prefix
 ******************
 We rely on `bedtools <https://bedtools.readthedocs.io/en/latest/>`_ for intersection of regions. Bedtools requires that the naming scheme for the first column is identical, meaning that either both files have a chr-prefix, or both don't have it. A mixture will cause an error. STARE will check the files in advance and should take care of this for you. But if there is an unexpected format or the scaffolds don't start with "chr", this will likely fail. This affects the region file (-b), gene annotation (-a), sequence file (-g) and regions to exclude (-x). It might be worth ensuring consistency for the chromosome name in each of the files, if you suspect that to be the issue.
