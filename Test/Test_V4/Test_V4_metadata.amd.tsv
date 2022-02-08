@@ -1,0 +1,30 @@
+[Description]
+process	STARE0.1
+run_by_user	dennis
+date	02_08_22
+time	17_47_52_N
+analysis_id	/Users/dennis/GitHub/STARE/Code/../Test//Test_V4/Test_V4
+
+[Command]
+STARE.sh -g /Users/dennis/GitHub/STARE/Code/../Test//Test_Data/example_sequence_chr.fa -b /Users/dennis/GitHub/STARE/Code/../Test//Test_Data/example_regions.bed -o /Users/dennis/GitHub/STARE/Code/../Test//Test_V4 -p /Users/dennis/GitHub/STARE/Code/../PWMs/2.0/human_jaspar_hoc_kellis.PSEM -a /Users/dennis/GitHub/STARE/Code/../Test//Test_Data/example_annotation.gtf -w 3000
+
+[Inputs]
+region_file	/Users/dennis/GitHub/STARE/Code/../Test//Test_Data/example_regions.bed
+signal_column	0
+
+[References]
+genome_reference	/Users/dennis/GitHub/STARE/Code/../Test//Test_Data/example_sequence_chr.fa
+psems	/Users/dennis/GitHub/STARE/Code/../PWMs/2.0/human_jaspar_hoc_kellis.PSEM
+genome_annotation	/Users/dennis/GitHub/STARE/Code/../Test//Test_Data/example_annotation.gtf
+
+[Output path]
+/Users/dennis/GitHub/STARE/Code/../Test//Test_V4
+
+[Parameters]
+cores	1
+window	3000
+decay	TRUE
+
+[Metrics]
+Number of provided regions	7
+Number of considered psems	     726

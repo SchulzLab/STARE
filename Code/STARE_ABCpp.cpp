@@ -3,6 +3,7 @@
 //
 
 # include <iostream>
+# include <iomanip>
 # include <string>
 # include <vector>
 # include <numeric>
@@ -322,8 +323,8 @@ int main(int argc, char **argv) {
         if (window_end > hic_boundaries[gene.second[2]][1]) {
             hic_boundaries[gene.second[2]][1] = window_end;
         }
-        window_out << peak_chr_prefix + gene.second[2] << "\t" << to_string(window_start) << "\t"
-                   << to_string(window_end) << "\t" << gene.first << "\n";
+        window_out << peak_chr_prefix + gene.second[2] << "\t" << window_start << "\t" << window_end << "\t"
+        << gene.first << "\n";
     }
     window_out.close();
 
@@ -743,27 +744,26 @@ int main(int argc, char **argv) {
                     auto matching_peak = peak_info_map[interaction.substr(interaction.find("*") + 1)];
                     for (int a_col = 0; a_col < col_num; a_col++) {
                         if (row_floats[4 + a_col * 3] >= abc_cutoff) {  // Check again, it's present if only one exceeds.
-                            out_streams[a_col] << gene_map[2] + "\t" + to_string(matching_peak.start) + "\t" +
-                                                  to_string(matching_peak.end);
-                            out_streams[a_col] << "\t" + gene_map[0] + "\t" + gene_map[1];
-                            out_streams[a_col] << "\t" + interaction.substr(interaction.find("*") + 1);
-                            out_streams[a_col] << "\t" + to_string(row_floats[2 + a_col * 3]);  // signalValue
-                            out_streams[a_col] << "\t" + to_string(row_floats[0]);  // Contact
-                            out_streams[a_col] << "\t" + to_string(row_floats[3 + a_col * 3]);  // scaledActivity
-                            out_streams[a_col] << "\t" + to_string(row_floats[1]);  // scaledContact
+                            out_streams[a_col] << gene_map[2] << "\t" << matching_peak.start << "\t" << matching_peak.end;
+                            out_streams[a_col] << "\t" << gene_map[0] << "\t" << gene_map[1];
+                            out_streams[a_col] << "\t" << interaction.substr(interaction.find("*") + 1);
+                            out_streams[a_col] << "\t" << setprecision(8) << row_floats[2 + a_col * 3];  // signalValue
+                            out_streams[a_col] << "\t" << setprecision(8) << row_floats[0];  // Contact
+                            out_streams[a_col] << "\t" << setprecision(8) << row_floats[3 + a_col * 3];  // scaledActivity
+                            out_streams[a_col] << "\t" << setprecision(8) << row_floats[1];  // scaledContact
                             // chr-scaled Contact * signalValue OR adjustedActivity
                             if (do_adjusted_abc) {
-                                out_streams[a_col] << "\t" + to_string(row_floats[intergenic_activity_col + a_col * 3]);
+                                out_streams[a_col] << "\t" << setprecision(8) << row_floats[intergenic_activity_col + a_col * 3];
                             }
                             else {
-                                out_streams[a_col] << "\t" + to_string(row_floats[0] / chr_max * row_floats[intergenic_activity_col + a_col * 3]);
+                                out_streams[a_col] << "\t" << setprecision(8) << row_floats[0] / chr_max * row_floats[intergenic_activity_col + a_col * 3];
                             }
 
                             int distance = min(abs(stoi(gene_map[3]) - matching_peak.start),
                                                abs(stoi(gene_map[3]) - matching_peak.end));
 
-                            out_streams[a_col] << "\t" + to_string(distance);  // Distance
-                            out_streams[a_col] << "\t" + to_string(row_floats[4 + a_col * 3])+ "\n";  // ABC-Score
+                            out_streams[a_col] << "\t" << distance;  // Distance
+                            out_streams[a_col] << "\t" << setprecision(8) << row_floats[4 + a_col * 3] << "\n";  // ABC-Score
                             // Sum up the attributes of the interaction.
                             gene_info[a_col][0] += 1;
                             gene_info[a_col][1] += row_floats[2 + a_col * 3];
@@ -775,11 +775,11 @@ int main(int argc, char **argv) {
                     if (interaction_tracker[i+1].substr(0, interaction_tracker[i+1].find("*")) != gene_id) {
                         written_genes.insert(gene_id);
                         for (int a_col = 0; a_col < col_num; a_col++) {
-                            gene_info_streams[a_col] << gene_id + "\t" + gene_map[1] + "\t" + gene_map[2] + "\t" + gene_map[3];
+                            gene_info_streams[a_col] << gene_id << "\t" << gene_map[1] << "\t" << gene_map[2] << "\t" << gene_map[3];
                             int num_enhancer = static_cast<int>(gene_info[a_col][0]);
                             if (num_enhancer > 0) {
-                                gene_info_streams[a_col] << "\t" + to_string(num_enhancer) + "\t" + to_string(gene_info[a_col][1]/num_enhancer) +
-                                                            "\t" + to_string(gene_info[a_col][2]/num_enhancer) + "\t" + to_string(gene_info[a_col][3]/num_enhancer) + "\t-\n";
+                                gene_info_streams[a_col] << "\t" << num_enhancer << "\t" << gene_info[a_col][1]/num_enhancer <<
+                                                            "\t" << gene_info[a_col][2]/num_enhancer << "\t" << gene_info[a_col][3]/num_enhancer << "\t-\n";
                             }
                             else {
                                 gene_info_streams[a_col] << "\t0\t0\t0\t0\tScore of candidates too low\n";
@@ -814,8 +814,8 @@ int main(int argc, char **argv) {
         }
         if (fail_message.size() > 0) {
             for (int a_col = 0; a_col < col_num; a_col++) {
-                gene_info_streams[a_col] << gene_id + "\t" + gene_map[1] + "\t" + gene_map[2] + "\t" + gene_map[3] +
-                                            "\t0\t0\t0\t0\t" + fail_message + "\n";
+                gene_info_streams[a_col] << gene_id << "\t" << gene_map[1] << "\t" << gene_map[2] << "\t" << gene_map[3]
+                << "\t0\t0\t0\t0\t" << fail_message << "\n";
             }
         }
     }

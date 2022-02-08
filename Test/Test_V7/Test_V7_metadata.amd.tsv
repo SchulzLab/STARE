@@ -1,0 +1,35 @@
+[Description]
+process	STARE0.1
+run_by_user	dennis
+date	02_08_22
+time	17_47_53_N
+analysis_id	/Users/dennis/GitHub/STARE/Code/../Test//Test_V7/Test_V7
+
+[Command]
+STARE.sh -g /Users/dennis/GitHub/STARE/Code/../Test//Test_Data/example_sequence_chr21part.fa -b /Users/dennis/GitHub/STARE/Code/../Test//Test_Data/ABC_example_regions.bed -o /Users/dennis/GitHub/STARE/Code/../Test//Test_V7 -p /Users/dennis/GitHub/STARE/Code/../PWMs/2.0/human_jaspar_hoc_kellis.PSEM -a /Users/dennis/GitHub/STARE/Code/../Test//Test_Data/ABC_example_annotation.gtf -w 500000 -n 4+ -t 0 -f /Users/dennis/GitHub/STARE/Code/../Test//Test_Data/ABC_example_HiCFiles/ -k 5000 -t 0
+
+[Inputs]
+region_file	/Users/dennis/GitHub/STARE/Code/../Test//Test_Data/ABC_example_regions.bed
+signal_column	4+
+
+[References]
+genome_reference	/Users/dennis/GitHub/STARE/Code/../Test//Test_Data/example_sequence_chr21part.fa
+psems	/Users/dennis/GitHub/STARE/Code/../PWMs/2.0/human_jaspar_hoc_kellis.PSEM
+genome_annotation	/Users/dennis/GitHub/STARE/Code/../Test//Test_Data/ABC_example_annotation.gtf
+
+[Output path]
+/Users/dennis/GitHub/STARE/Code/../Test//Test_V7
+
+[Parameters]
+cores	1
+window	500000
+path with hi-c contact files	/Users/dennis/GitHub/STARE/Code/../Test//Test_Data/ABC_example_HiCFiles/
+bin size of hi-c contacts	5000
+ABC-score cut-off	0
+Use pseudocount for contact frequency	TRUE
+Use adaptedABC version	TRUE
+Window size for the adaptedABC	5000000
+
+[Metrics]
+Number of provided regions	7
+Number of considered psems	     726

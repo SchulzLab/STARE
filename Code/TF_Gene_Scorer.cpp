@@ -499,7 +499,8 @@ int main(int argc, char **argv) {
         for (int g = 0; g < candidate_genes.size(); g++) {  // Runs once if zero or one column was given.
             string gene = candidate_genes[g];
             vector<double> these_gene_affinities(num_tfs + 2, 0.0);
-            int distance_helper = 0;
+            double distance_helper = 0;
+            int mapped_peaks = 0;
             int gene_tss = stoi(tss_map[gene][1]);
 
             for (string region: gene_region_map[gene]) {
@@ -526,14 +527,18 @@ int main(int argc, char **argv) {
                     else if (use_abc_scoring) {  // Scale with the intergenic score column.
                         affinity_scaler = interaction_scores[gene + "-" + region][c];  // 0 if not existent.
                     }
+                    // If an interaction was not present in one of the abc-files, the interaction score is 0.
+                    if (affinity_scaler > 0) {  //
+                        mapped_peaks++;
+                    }
                     // Add the whole normalized affinity vector to the already existing one.
                     for (int i = 0; i < num_tfs; i++) {
                         these_gene_affinities[i] += (affinity_vals[i] / motif_lengths[i]) * affinity_scaler;
                     }
                 }
             }
-            these_gene_affinities[num_tfs] = gene_region_map[gene].size();
-            these_gene_affinities[num_tfs + 1] = distance_helper / gene_region_map[gene].size();
+            these_gene_affinities[num_tfs] = mapped_peaks;
+            these_gene_affinities[num_tfs + 1] = distance_helper / mapped_peaks;
             gene_tf_affinities[g] = these_gene_affinities;
         }
 
@@ -548,11 +553,12 @@ int main(int argc, char **argv) {
             string gene = candidate_genes[g];
             vector<double> these_affinities = gene_tf_affinities[g];
             gene_tf_out << gene;
+            gene_tf_out.precision(10);
             for (int i = 0; i < num_tfs; i++) {
-                gene_tf_out << "\t" << To_string_with_precision(these_affinities[i]);
+                gene_tf_out << "\t" << fixed << these_affinities[i];
             }
-            gene_tf_out << "\t" << to_string(static_cast<double>(these_affinities[num_tfs]));  // NumPeaks
-            gene_tf_out << "\t" << to_string(these_affinities[num_tfs + 1]);  // AvgPeakSize
+            gene_tf_out << "\t" << static_cast<int>(these_affinities[num_tfs]);  // NumPeaks
+            gene_tf_out << "\t" << these_affinities[num_tfs + 1];  // AvgPeakSize
             gene_tf_out << "\n";
         }
         gene_tf_out.close();  // Otherwise the return of the command would be written to output.

@@ -1,0 +1,30 @@
+[Description]
+process	STARE0.1
+run_by_user	dennis
+date	02_08_22
+time	17_47_55_N
+analysis_id	/Users/dennis/GitHub/STARE/Code/../Test//Test_V10/Test_V10
+
+[Command]
+STARE.sh -g /Users/dennis/GitHub/STARE/Code/../Test//Test_Data/example_sequence_chr21part.fa -b /Users/dennis/GitHub/STARE/Code/../Test//Test_Data/ABC_example_regions.bed -o /Users/dennis/GitHub/STARE/Code/../Test//Test_V10 -p /Users/dennis/GitHub/STARE/Code/../PWMs/2.0/human_jaspar_hoc_kellis.PSEM -a /Users/dennis/GitHub/STARE/Code/../Test//Test_Data/ABC_example_annotation.gtf -e False -r /Users/dennis/GitHub/STARE/Code/../Test//Test_Data/example_ABCpp_scoredInteractions_c4.txt.gz -n 4-5
+
+[Inputs]
+region_file	/Users/dennis/GitHub/STARE/Code/../Test//Test_Data/ABC_example_regions.bed
+signal_column	4-5
+
+[References]
+genome_reference	/Users/dennis/GitHub/STARE/Code/../Test//Test_Data/example_sequence_chr21part.fa
+psems	/Users/dennis/GitHub/STARE/Code/../PWMs/2.0/human_jaspar_hoc_kellis.PSEM
+genome_annotation	/Users/dennis/GitHub/STARE/Code/../Test//Test_Data/ABC_example_annotation.gtf
+
+[Output path]
+/Users/dennis/GitHub/STARE/Code/../Test//Test_V10
+
+[Parameters]
+cores	1
+window	50000
+existing ABC-score file that was used	/Users/dennis/GitHub/STARE/Code/../Test//Test_Data/example_ABCpp_scoredInteractions_c4.txt.gz
+
+[Metrics]
+Number of provided regions	7
+Number of considered psems	     726

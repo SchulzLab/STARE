@@ -1,12 +1,12 @@
 [Description]
 process	STARE0.1
 run_by_user	dennis
-date	01_27_22
-time	16_54_13_N
+date	02_08_22
+time	17_40_41_N
 analysis_id	/Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Code/../Test//Test_V7/Test_V7
 
 [Command]
-STARE.sh -g /Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Code/../Test//Test_Data/example_sequence_chr21part.fa -b /Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Code/../Test//Test_Data/ABC_example_regions.bed -o /Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Code/../Test//Test_V7 -p /Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Code/../PWMs/2.0/human_jaspar_hoc_kellis.PSEM -a /Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Code/../Test//Test_Data/ABC_example_annotation.gtf -w 500000 -n 4+ -t 0 -f /Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Code/../Test//Test_Data/ABC_example_HiCFiles/ -k 5000 -t 0
+STARE.sh -g /Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Code/../Test//Test_Data/example_sequence_chr21part.fa -b /Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Code/../Test//Test_Data/ABC_example_regions.bed -o /Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Code/../Test//Test_V7 -p /Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Code/../PWMs/2.0/human_jaspar_hoc_kellis.PSEM -a /Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Code/../Test//Test_Data/ABC_example_annotation.gtf -w 500000 -n 4+ -f /Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Code/../Test//Test_Data/ABC_example_HiCFiles/ -k 5000 -t 0
 
 [Inputs]
 region_file	/Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Code/../Test//Test_Data/ABC_example_regions.bed
