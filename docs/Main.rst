@@ -176,7 +176,7 @@ Gene-TF-matrices
 
 The gene-TF-matrices will always have the same format.
 
- - *Pancake_TF_Gene_Affinities.txt.gz*: Matrix of TF affinities summarised per gene, with the genes as rows and TFs as columns. It has two additional columns with the average peak size and average peak distance of the regions that were considered for the gene.
+ - *Pancake_TF_Gene_Affinities.txt.gz*: Matrix of TF affinities summarised per gene, with the genes as rows and TFs as columns. It has two additional columns with the number of peaks considered for the gene, as well as the average peak distance.
  - *Pancake_discarded_Genes.txt*: Lists all genes where no TF affinities could be calculated, with a note indicating why.
 
 Output per activity column (-n)
