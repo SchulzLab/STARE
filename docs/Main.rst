@@ -92,7 +92,7 @@ The table below provides the list of all input data (together with their corresp
 Other input options
 ===============
 
-There are more tunable options for STARE, some of which will be explained in more detail below the table, marked with an asterisk :sup:`*`. Those flags that are *required* when running the ABC-mode are labelled accordingly. If you miss one, STARE should notice and tell you.
+There are more tunable options for STARE, some of which will be explained in more detail below the table, marked with an asterisk (:sup:`*`). Flags that are *required* when running the ABC-mode are labelled accordingly (:sup:`ABC`). If you miss one, STARE should notice and tell you.
 
 .. csv-table:: 
    :header: "Flag", "Description"
