@@ -17,7 +17,7 @@ For convenience, here are the flags that are specific to the ABC-scoring alone:
 
    -b, Bed-file containing your candidate regions. Headers are allowed if they start with #.
    -a, Gene annotation file in gtf-format.
-   -o, Name of the output folder. The folder will be created and can't already exists to prevent overwriting of files. All output files will have the folder name as prefix.
+   -o, Output-prefix, all files will start with that prefix. Unlike whole STARE, no separate folder will be created.
 
 **optional**
 
