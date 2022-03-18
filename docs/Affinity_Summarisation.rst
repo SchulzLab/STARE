@@ -35,7 +35,7 @@ If you did the region-gene mapping with the ABC-score, we change the scaling and
 Not-adapted ABC-scoring
 ******************
 
-If you chose the run the ABC-scoring without the adapted score, we can't use the adapted activity for scaling. Thus, the affinity scaling changes to:
+If you chose to run the ABC-scoring without the adapted score, we can't use the adapted activity for scaling. Thus, the affinity scaling changes to:
 
 .. image:: ../Figures/STARE_UnadaptedABCEquation.png
   :alt: STARE_UnadaptedABCEquation
