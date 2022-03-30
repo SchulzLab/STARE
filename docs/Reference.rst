@@ -8,7 +8,7 @@ Hecker, Dennis, Fatemeh Behjati Ardakani, and Marcel H. Schulz. “The Adapted A
 
 The results of our analyses are available via Zenodo.
 
-.. image:: https://zenodo.org/badge/DOI/10.5281/zenodo.5841992.svg
+.. image:: https://zenodo.org/badge/DOI/10.5281/zenodo.5841991.svg
   :alt: ZenodoBadge
   :target: https://doi.org/10.5281/zenodo.5841991
 
