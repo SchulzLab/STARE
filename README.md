@@ -1,5 +1,5 @@
 [![Documentation Status](https://readthedocs.org/projects/stare/badge/?version=latest)](https://stare.readthedocs.io/en/latest/?badge=latest)
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.5841992.svg)](https://doi.org/10.5281/zenodo.5841991)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.5841991.svg)](https://doi.org/10.5281/zenodo.5841991)
 
 
 # STARE - Look into TF regulation on gene level leveraging an adapted Activity-By-Contact score
