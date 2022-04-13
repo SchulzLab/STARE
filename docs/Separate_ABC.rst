@@ -25,6 +25,7 @@ For convenience, here are the flags that are specific to the ABC-scoring alone:
    :header: "Flag", "Description"
    :widths: 8, 50
 
+   -u / --genes, File with rows of gene IDs/symbols to limit the output to. The respective IDs/symbols must be present in the gtf-file (-a). If you don't give any gene list you will get the result for all genes in the gtf-file.
    -n, Column(s) in the --bed_file representing the activity of the region. You will get one set of output files for each column. Start counting at 1. Allowed formats are individual columns; column ranges; columns separated by comma as well as a start column with all consecutive columns.  
    -c, Number of cores to provide for parallel computing. Note that the processing is also heavy on memory.
    -x, Bed-file with regions to exclude. All regions in the --bed_file with ≥ 1 bp overlap will be discarded from all further analyses. Make sure that your -b file has the same naming scheme e.g. both *chr1* or both *1* in the first column. Otherwise an intersection is not possible.
