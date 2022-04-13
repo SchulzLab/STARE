@@ -15,12 +15,10 @@
 # include <algorithm>
 # include <regex>
 
-class constants {
-public:
-    static const int precision = 10;
-};
-
-std::string To_string_with_precision(double a_value);
+//class constants {
+//public:
+//    static const int precision = 10;
+//};
 
 std::string SetOptionalInput(std::string input_string, std::string default_value);
 

@@ -9,6 +9,7 @@
 # include <numeric>
 # include <fstream>
 # include <math.h>
+# include <limits>
 # include <chrono>
 # include <regex>
 # include <sstream>
@@ -62,14 +63,15 @@ int main(int argc, char **argv) {
     string parameter_help = "-b enhancer/peak-file"
                             "\n-n activity-column(s), start counting at 1"
                             "\n-a gtf gene annotation"
-                            "\n-gw genewindow-size"
-                            "\n-cf folder with the normalized hic-files per chromosome"
-                            "\n-bin binsize of the hic-files"
+                            "\n-u file with geneIDs/symbols to limit the output to"
+                            "\n-w genewindow-size"
+                            "\n-f folder with the normalized hic-files per chromosome"
+                            "\n-k binsize of the hic-files"
                             "\n-t cut-off for the ABC-score (default 0.02), set to 0 to get all scored interactions"
-                            "\n-d prefix with which the files are written"
+                            "\n-o prefix with which the files are written"
                             "\n-c number of cores used (default 1)"
                             "\n-x file with regions to be excluded"
-                            "\n-p whether to use pseudocount for contact frequency (default True)"
+                            "\n-d whether to use pseudocount for contact frequency (default True)"
                             "\n-q whether to adapt the activity for an enhancer's contacts (default True)"
                             "\n-m enhancer window size in which to consider contacts for adjustment";
 
@@ -86,12 +88,13 @@ int main(int argc, char **argv) {
     }
 
     // Reading the input args:
-    string b_peakfile, a_promoterfile, n_activitycol, w_genewindowsize, k_binsize, t_abc_cutoff, f_contactfolder,
+    string b_peakfile, a_promoterfile, u_genefile, n_activitycol, w_genewindowsize, k_binsize, t_abc_cutoff, f_contactfolder,
             c_cores, o_prefix, x_exclude_regions, d_pseudocount, q_adjusted_abc, m_enhwindowsize;
     static struct option long_options[] =
             {
                     {"b",   required_argument, NULL, 'b'},
                     {"a",   required_argument, NULL, 'a'},
+                    {"u",   required_argument, NULL, 'u'},
                     {"n",   required_argument, NULL, 'n'},
                     {"w",  required_argument, NULL, 'w'},
                     {"k", required_argument, NULL, 'k'},
@@ -107,13 +110,16 @@ int main(int argc, char **argv) {
             };
 
     int arg;
-    while ((arg = getopt_long_only(argc, argv, "b:a:n:w:k:t:c:f:o:x:d:h:q:m:", long_options, NULL)) != -1) {
+    while ((arg = getopt_long_only(argc, argv, "b:a:u:n:w:k:t:c:f:o:x:d:h:q:m:", long_options, NULL)) != -1) {
         switch (arg) {
             case 'b':
                 b_peakfile = optarg;
                 break;
             case 'a':
                 a_promoterfile = optarg;
+                break;
+            case 'u':
+                u_genefile = optarg;
                 break;
             case 'n':
                 n_activitycol = optarg;
@@ -185,12 +191,12 @@ int main(int argc, char **argv) {
     // ____________________________________________________________
     // PROCESS GTF GENE ANNOTATION
     // ____________________________________________________________
+    cout << "Processing gene annotation, intersecting with regions" << endl;
     map <string, unordered_set<string>> chr_gene_map;  // For each chromosome stores its genes.
     unordered_map <string, vector<string>> promoter_map;  // For ID, name, chr, TSS.
     promoter_map.reserve(10000);
     unordered_map <string, vector<int>> hic_boundaries;  // Store the min/max boundaries for each chromosome.
-    cout << "Reading Gene annotation " << endl;
-    int annot_len = FilePeek(a_promoterfile) * 3;
+    int annot_len = FilePeek(a_promoterfile) * 5;
     FILE *Read_Gene_Annotation = fopen(a_promoterfile.c_str(), "rb");
     char annot_buffer[annot_len];
     string row;
@@ -204,7 +210,7 @@ int main(int argc, char **argv) {
                 if (columns[2] == "gene") {
                     string id_delimiter = "gene_id ";
                     int id_start = columns[8].find(id_delimiter, 0) + id_delimiter.size();
-                    int id_end = columns[8].find(";", 0);
+                    int id_end = columns[8].find(";", id_start);
                     string gene_id = columns[8].substr(id_start + 1,
                                                        id_end - id_start - 2);  // Remove the quotation marks.
                     string name_delimiter = "gene_name ";
@@ -227,22 +233,26 @@ int main(int argc, char **argv) {
                         chr = chr.substr(3);
                     }
                     string gene_start;
-
                     if (strand == "+") {
                         gene_start = columns[3];
                     } else {
                         gene_start = columns[4];
                     }
-                    if (promoter_map.find(gene_id) != promoter_map.end()) {  // Replace if the new one is more in 5'.
-                        if (((stoi(promoter_map[gene_id][3]) > stoi(gene_start)) and (strand == "+")) or
-                            ((stoi(promoter_map[gene_id][3]) < stoi(gene_start)) and (strand == "-"))) {
+                    bool already_seen = false;  // To not allow duplicates across multiple chromosomes.
+                    // Replace if the new one is more in 5', must be on the same chromosome in case of non-uniqueness.
+                    if (promoter_map.find(gene_id) != promoter_map.end()) {
+                        already_seen = true;
+                        if (((stoi(promoter_map[gene_id][3]) > stoi(gene_start)) and (strand == "+") and (promoter_map[gene_id][2] == chr)) or
+                            ((stoi(promoter_map[gene_id][3]) < stoi(gene_start)) and (strand == "-") and (promoter_map[gene_id][2] == chr))) {
                             promoter_map[gene_id][3] = gene_start;
                         }
                     } else {
                         promoter_map[gene_id] = vector < string > {gene_id, gene_name, chr, gene_start};
                     }
                     hic_boundaries[chr] = {0, 0};
-                    chr_gene_map[chr].insert(gene_id);
+                    if (!already_seen) {
+                        chr_gene_map[chr].insert(gene_id);
+                    }
                 }
             }
         }
@@ -454,6 +464,24 @@ int main(int argc, char **argv) {
     }
 
     // ____________________________________________________________
+    // READ GENES TO FILTER FOR
+    // ____________________________________________________________
+    unordered_set<string> filter_genes;
+    if (u_genefile.length() != 0 and u_genefile != "0") {
+        ifstream read_genefile(u_genefile);
+        if (!read_genefile) {
+            cout << "ERROR could not open gene file\n" << u_genefile << endl;
+            return 1;
+        }
+        string row;
+        while (!read_genefile.eof()) {
+            getline(read_genefile, row);
+            filter_genes.insert(row);
+        }
+        read_genefile.close();
+    }
+
+    // ____________________________________________________________
     // ITERATE THROUGH THE CHROMOSOMES
     // ____________________________________________________________
     // First see which contact files are available.
@@ -524,6 +552,9 @@ int main(int argc, char **argv) {
         auto start_read = chrono::high_resolution_clock::now();
         int min_bin = hic_boundaries[chr][0] / bin_size;
         int max_bin = hic_boundaries[chr][1] / bin_size;
+        // For the pseudocount we are not restricted to the hic_boundaries set by the genes.
+        int min_pseudo_bin = numeric_limits<int>::max();
+        int max_pseudo_bin = 0;
         boost::numeric::ublas::mapped_matrix<double> contact_matrix(max_bin + 1 - min_bin,
                                                                     max_bin + 1 - min_bin);  // +1 To include max_bin.
 
@@ -547,6 +578,12 @@ int main(int argc, char **argv) {
                         bin1 = second_bin;
                         bin2 = first_bin;
                     }
+                    if (bin1 < min_pseudo_bin) {
+                        min_pseudo_bin = bin1;
+                    }
+                    if (bin2 > max_pseudo_bin) {
+                        max_pseudo_bin = bin2;
+                    }
                     int distance = (bin2 - bin1) * bin_size;
                     if (bin_size <= distance and distance < 1000000) {
                         contact_sums[distance / bin_size - 1] += contact;
@@ -564,7 +601,7 @@ int main(int argc, char **argv) {
         for (int c = 0; c < contact_sums.size(); c++) {
             if (contact_sums[c] > 0) {
                 regression_count++;
-                int possible_hits = (max_bin - min_bin) - (c + 1);
+                int possible_hits = (max_pseudo_bin - min_pseudo_bin) - (c + 1);
                 double log_distance = log((c + 1) * bin_size);  // Is base-e logarithm. Reverse is exp().
                 double log_contact = log(contact_sums[c] / possible_hits);
                 sumX += log_distance;
@@ -657,14 +694,19 @@ int main(int argc, char **argv) {
         // Now that we mapped the peaks to the genes and fetched the respective information on the peaks, we can do
         // the gene-wise scoring.
         for (string chr_gene : chr_gene_map[chr]) {
+            // Check if we can skip that gene, if it's not in the u_genefile with its ID or symbol.
+            if (u_genefile.length() != 0 and u_genefile != "0") {
+                if ((filter_genes.find(chr_gene) == filter_genes.end()) and (filter_genes.find(promoter_map[chr_gene][1]) == filter_genes.end())) {
+                    continue;
+                }
+            }
             int num_candidates = gene_peak_map[chr_gene].size();
             if (num_candidates == 0) {  // Can also happen if all were overlapping with excluded regions.
                 genes_wo_candidates.insert(chr_gene);
                 continue;
             }
             // Contact | scaledContact | + activity_cols x (SignalValue | scaled/adjustedActivity | ABC-Score)
-            vector <vector<double>> candidate_scores(num_candidates,
-                                                     vector<double>(2 + 3 * (col_num)));
+            vector <vector<double>> candidate_scores(num_candidates, vector<double>(2 + 3 * (col_num)));
             vector <string> candidate_interactions(num_candidates);
             vector<double> max_signals(col_num);
             double max_contact = 0;
@@ -797,6 +839,11 @@ int main(int argc, char **argv) {
     for (auto entry: promoter_map) {
         string gene_id = entry.first;
         auto gene_map = entry.second;
+        if (u_genefile.length() != 0 and u_genefile != "0") {
+            if ((filter_genes.find(gene_id) == filter_genes.end()) and (filter_genes.find(promoter_map[gene_id][1]) == filter_genes.end())) {
+                continue;
+            }
+        }
         string fail_message;
         if (genes_wo_hic.find(gene_id) != genes_wo_hic.end()) {
             fail_message = "Missing normalized contact file";

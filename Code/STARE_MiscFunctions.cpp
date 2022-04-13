@@ -12,14 +12,6 @@
  * Part of STARE: https://github.com/SchulzLab/STARE
  */
 
-std::string To_string_with_precision(double a_value)
-{
-    // to_string of doubles is restricted to 6 digits, this is a workaround.
-    std::ostringstream out;
-    out.precision(constants::precision);
-    out << std::fixed << a_value;
-    return out.str();
-}
 
 std::string SetOptionalInput(std::string input_string, std::string default_value) {
     // If the input_string is empty, return the default value.

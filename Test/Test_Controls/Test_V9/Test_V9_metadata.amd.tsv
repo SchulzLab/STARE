@@ -1,12 +1,12 @@
 [Description]
 process	STARE0.1
 run_by_user	dennis
-date	02_08_22
-time	17_40_42_N
+date	04_04_22
+time	15_43_28_N
 analysis_id	/Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Code/../Test//Test_V9/Test_V9
 
 [Command]
-STARE.sh -g /Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Code/../Test//Test_Data/example_sequence_chr21part.fa -b /Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Code/../Test//Test_Data/ABC_example_regions.bed -o /Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Code/../Test//Test_V9 -p /Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Code/../PWMs/2.0/human_jaspar_hoc_kellis.PSEM -a /Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Code/../Test//Test_Data/ABC_example_annotation.gtf -w 500000 -n 4+ -t 0 -f /Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Code/../Test//Test_Data/ABC_example_HiCFiles/ -k 5000 -t 0 -q False
+STARE.sh -g /Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Code/../Test//Test_Data/example_sequence_chr21part.fa -b /Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Code/../Test//Test_Data/ABC_example_regions.bed -o /Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Code/../Test//Test_V9 -p /Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Code/../PWMs/2.0/human_jaspar_hoc_kellis.PSEM -a /Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Code/../Test//Test_Data/ABC_example_annotation.gtf -n 4+ -r /Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Code/../Test//Test_Data/example_ABCpp_scoredInteractions_c4.txt.gz
 
 [Inputs]
 region_file	/Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Code/../Test//Test_Data/ABC_example_regions.bed
@@ -22,13 +22,8 @@ genome_annotation	/Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Code/../Test//Test_Da
 
 [Parameters]
 cores	1
-window	500000
-path with hi-c contact files	/Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Code/../Test//Test_Data/ABC_example_HiCFiles/
-bin size of hi-c contacts	5000
-ABC-score cut-off	0
-Use pseudocount for contact frequency	TRUE
-Use adaptedABC version	FALSE
-Window size for the adaptedABC	5000000
+window	50000
+existing ABC-score file that was used	/Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Code/../Test//Test_Data/example_ABCpp_scoredInteractions_c4.txt.gz
 
 [Metrics]
 Number of provided regions	7

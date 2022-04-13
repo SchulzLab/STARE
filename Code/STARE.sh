@@ -7,12 +7,13 @@ help="STARE version 0.1
 Usage: ./STARE.sh
 [-b/--bed_file bed file containing open chromatin regions]
 [-g/--genome input fasta file in RefSeq format]
-[-p/--psem file with PSEMs of TFs] OR [-s/--pscm file with PSCMs in transfac format]
+[-s/--pscm file with PSCMs in transfac format] OR [-p/--psem file with PSEMs of TFs]
 [-a/--annotation gene annotation file in gtf-format, required to generate the gene view]
 [-o/--output prefix_path of output files]\n
 Optional parameters:
+[-u/--genes file with rows of gene IDs/symbols to limit the output (else all in gtf)]
 [-n/--column column in the -b file containing the average per base signal within a peak, start counting at 1]
-[-y/--gc_content Mean GC-content to calculate PSEMs, only necessary if you gave a PSCM file (default human 0.41)]
+[-y/--gc_content Mean GC-content to calculate PSEMs, by default this is automatically derived from your bed_file]
 [-c/--cores number of cores to use (default 1)]
 [-x/--exclude_bed bed-file with regions to exclude (e.g. blacklisted regions)]
 [-w/--window window size around TSS for mapping regions to genes (default 50KB; 5MB for ABC-mode)]
@@ -23,23 +24,24 @@ Optional parameters:
 [-q/--adapted_abc whether to use the adapted ABC-score (default True)]
 [-m/--enhancer_window window size around enhancers for the -q adjustment (default 5MB, minimally set to -w)]
 [-d/--pseudocount whether to use pseudocount for the contact frequency in the ABC-model (default True)]
-[-r/--existing_abc ABC-scoring file, if already calculated once for this input to avoid redundant calculation]"
-#[-z/--reshape instead of a dense matrix, write a sparse version (default False), optional input for GAZE]"
+[-r/--existing_abc ABC-scoring file, if already calculated once for this input to avoid redundant calculation]
+[-z/--reshape write a binary output (default False), optional input for GAZE]"
 
 # ------------------------------------------------------------------------------------------------------
 # FETCHING INPUT
 # ------------------------------------------------------------------------------------------------------
 print_help=0;
 print_version=0;
-genome=""
 regions=""
+genome=""
+annotation=""
 prefixP=""
 cores=1
 psems=""
 pscms=""
-pscm_cg=0.41
+pscm_cg=""
+genes="0"
 column="0"
-annotation=""
 window=""
 decay="TRUE"
 hic_contactfolder=""
@@ -57,7 +59,7 @@ die() { echo "$*" >&2; exit 2; }  # complain to STDERR and exit with error
 needs_arg() { if [ -z "$OPTARG" ]; then die "No arg for --$OPT option"; fi; }  # Required to enable long options.
 
 # Parsing command line.
-while getopts hvg:b:o:c:p:s:y:n:a:w:e:f:k:t:r:x:z:d:q:m:-: OPT; do
+while getopts hvg:b:o:c:p:s:y:u:n:a:w:e:f:k:t:r:x:z:d:q:m:-: OPT; do
   if [ "$OPT" = "-" ]; then   # long option: reformulate OPT and OPTARG
     OPT="${OPTARG%%=*}"       # extract long option name
     OPTARG="${OPTARG#$OPT}"   # extract long option argument (may be empty)
@@ -73,6 +75,7 @@ while getopts hvg:b:o:c:p:s:y:n:a:w:e:f:k:t:r:x:z:d:q:m:-: OPT; do
 	p | psem)	needs_arg; psems=$OPTARG;;
   s | pscm)	needs_arg; pscms=$OPTARG;;
   y | gc_content)	needs_arg; pscm_cg=$OPTARG;;
+  u | genes) needs_arg; genes=$OPTARG;;
 	n | column)	needs_arg; column=$OPTARG;;
 	a | annotation)	needs_arg; annotation=$OPTARG;;
 	w | window)	needs_arg; window=$OPTARG;;
@@ -93,7 +96,7 @@ done
 
 if [ "$print_version" -eq 1 ];
 then
-    echo "STARE version 0.1"
+    echo "STARE version 1.0.1"
     exit 1;
 fi
 
@@ -188,19 +191,11 @@ base_prefix=$(basename "${prefixP}")
 prefix_path=$prefixP"/"$base_prefix
 working_dir=$(cd "$(dirname "$0")" && pwd -P)
 
-# Transform PSCM to PSEM, if necessary.
-if [ -n "$pscms" ] ;
-then
-  echo "Transforming transfac-PSCMs to PSEMs"
-  psems=${prefix_path}_$(basename "$pscms").PSEM
-  "${working_dir}"/PSCM_to_PSEM "${pscms}" "${pscm_cg}" > "${psems}"
-fi
-
 metadatafile=${prefix_path}_metadata.amd.tsv
 # Create metadata file.
 touch "$metadatafile"
 echo "[Description]" >> "$metadatafile"
-echo "process	STARE0.1" >> "$metadatafile"
+echo "process	STARE 1.0.1" >> "$metadatafile"
 echo -e "run_by_user\t""$USER" >> "$metadatafile"
 echo -e "date\t""$d" >> "$metadatafile"
 echo -e "time\t""$t" >> "$metadatafile"
@@ -215,6 +210,10 @@ if [ -n "$column" ] ;
 then
 	echo -e "signal_column\t""$column" >> "$metadatafile"
 fi
+if [[ "$genes" != "0" ]];
+then
+  echo -e "gene set\t""$genes" >> "$metadatafile"
+fi
 if [ -n "$exclude_regions" ] ;
 then
 	echo -e "excluded regions\t""$exclude_regions" >> "$metadatafile"
@@ -222,10 +221,15 @@ fi
 echo "" >> "$metadatafile"
 echo "[References]" >> "$metadatafile"
 echo -e "genome_reference\t""$genome" >> "$metadatafile"
-if [ -n "$pscms" ] ;
+if [ -n "$pscms" ];
 then
   echo -e "pscms\t""$pscms" >> "$metadatafile"
-  echo -e "CG-content\t""$pscm_cg" >> "$metadatafile"
+  if [ -n "$pscm_cg" ];
+  then
+    echo -e "CG-content\t""$pscm_cg" >> "$metadatafile"
+  else
+    echo -e "CG-content\tautomatic from bed_file" >> "$metadatafile"
+  fi
 else
   echo -e "psems\t""$psems" >> "$metadatafile"
 fi
@@ -256,11 +260,21 @@ if [[ "$existing_abc" != "0" ]];
 then
   echo -e "existing ABC-score file that was used\t""$existing_abc" >> "$metadatafile"
 fi
+if [[ "$reshaping" == "TRUE" ]];
+then
+  echo -e "Reshaping to binary output\t""$reshaping" >> "$metadatafile"
+fi
+
 echo "" >> "$metadatafile"
 echo "[Metrics]" >> "$metadatafile"
 numReg=`grep -c . "$regions"`
 echo -e "Number of provided regions\t""$numReg" >> "$metadatafile"
-numMat=`grep ">" "$psems" | wc -l`
+if [ -n "$pscms" ];
+then
+  numMat=`grep "//" "$pscms" | wc -l`
+else
+  numMat=`grep ">" "$psems" | wc -l`
+fi
 echo -e "Number of considered psems\t""$numMat" >> "$metadatafile"
 
 # ------------------------------------------------------------------------------------------------------
@@ -275,7 +289,7 @@ else
   chrPrefix="FALSE"
 fi
 
-filteredRegions=$prefix_path"_candiate_binding_regions"
+filteredRegions=$prefix_path"_candidate_binding_regions"
 sed 's/chr//g' "$regions" >  "${filteredRegions}"_Filtered_Regions.bed
 sort -s -k1,1 -k2,2 -k3,3 "${filteredRegions}"_Filtered_Regions.bed | uniq > "${filteredRegions}"_sorted.bed
 rm "${filteredRegions}"_Filtered_Regions.bed
@@ -283,7 +297,7 @@ rm "${filteredRegions}"_Filtered_Regions.bed
 # Remove regions that overlap with regions in the $exclude_regions file with the intersect -v flag.
 if [ -n "$exclude_regions" ] ;
 then
-  sed 's/chr//g' "$exclude_regions" >  "${exclude_regions}"_noPrefix.bed
+  sed 's/chr//g' "$exclude_regions" > "${exclude_regions}"_noPrefix.bed
   bedtools intersect -a "${filteredRegions}"_sorted.bed -b "${exclude_regions}"_noPrefix.bed -v -header > "${filteredRegions}"_filtered.bed
   rm "${filteredRegions}"_sorted.bed
   rm "${exclude_regions}"_noPrefix.bed
@@ -310,8 +324,21 @@ then
 fi
 
 # Replace invalid characters in the fasta file with 'N', but skip the id rows (">...").
-"${working_dir}"/ReplaceInvalidChars -i "$openRegionSequences" -o "${prefix_path}"_FilteredSequences.fa -d "${prefix_path}"_maxRow.txt
+"${working_dir}"/ReplaceInvalidChars -i "$openRegionSequences" -o "${prefix_path}"_FilteredSequences.fa -d "${prefix_path}"_SeqMeta.txt
 rm "$openRegionSequences"
+
+# Transform PSCM to PSEM, if necessary.
+if [ -n "$pscms" ] ;
+then
+  echo "Transforming transfac-PSCMs to PSEMs"
+  if [ -z "$pscm_cg" ] ;
+  then
+    pscm_cg=`sed -n '2p' "${prefix_path}"_SeqMeta.txt`
+  fi
+  psems=${prefix_path}_$(basename "$pscms").PSEM
+  "${working_dir}"/PSCM_to_PSEM "${pscms}" "${pscm_cg}" > "${psems}"
+fi
+
 
 # ------------------------------------------------------------------------------------------------------
 # TF-AFFINITY WITH TRAP
@@ -321,9 +348,9 @@ startt=`date +%s`
 affinity=${prefix_path}_Affinity.txt
 
 echo "Starting TRAP"
-"${working_dir}"/TRAPmulti "$psems" "${prefix_path}"_FilteredSequences.fa "${prefix_path}"_maxRow.txt "$cores" > "${affinity}"
+"${working_dir}"/TRAPmulti "$psems" "${prefix_path}"_FilteredSequences.fa "${prefix_path}"_SeqMeta.txt "$cores" > "${affinity}"
 rm "${prefix_path}"_FilteredSequences.fa
-rm "${prefix_path}"_maxRow.txt
+rm "${prefix_path}"_SeqMeta.txt
 
 endt=`date +%s`
 echo $((endt-startt))"s TRAP"
@@ -337,7 +364,7 @@ then
   echo "ABC-scoring region-gene interactions"
   mkdir "${prefixP}""/ABC_output"
   abc_prefix_path=${prefixP}"/ABC_output/"${base_prefix}
-  "${working_dir}"/STARE_ABCpp -b "${filteredRegions}"_sorted.bed -n "${column}" -a "${annotation}" -w "${window}" -f "${hic_contactfolder}" -k "${hic_binsize}" -t "${abc_cutoff}" -o "${abc_prefix_path}" -d "${pseudocount}" -q "${adjustedABC}" -m "${enhancer_window}" -c "${cores}"
+  "${working_dir}"/STARE_ABCpp -b "${filteredRegions}"_sorted.bed -n "${column}" -a "${annotation}" -w "${window}" -f "${hic_contactfolder}" -k "${hic_binsize}" -t "${abc_cutoff}" -o "${abc_prefix_path}" -d "${pseudocount}" -q "${adjustedABC}" -m "${enhancer_window}" -c "${cores}" -u "${genes}"
   existing_abc=${abc_prefix_path}"_ABCpp_scoredInteractions.txt.gz"
 fi
 
@@ -348,17 +375,11 @@ fi
 startg=`date +%s`
 echo "Generating TF-Gene scores"
 mkdir "${prefixP}""/Gene_TF_matrices"
-"${working_dir}"/TF_Gene_Scorer -a "${annotation}" -b "${filteredRegions}"_sorted.bed -n "${column}" -i "${affinity}" -o "${prefixP}"/Gene_TF_matrices/"${base_prefix}" -p "${psems}" -w ${window} -e "${decay}" -c "${cores}" -abc "${existing_abc}"
+"${working_dir}"/TF_Gene_Scorer_Reshape -a "${annotation}" -b "${filteredRegions}"_sorted.bed -n "${column}" -i "${affinity}" -o "${prefixP}"/Gene_TF_matrices/"${base_prefix}" -p "${psems}" -w ${window} -e "${decay}" -c "${cores}" -abc "${existing_abc}" -z "${reshaping}" -u "${genes}"
 
 endg=`date +%s`
 echo $((endg-startg))"s TF-Gene Scores"
 
-#if [ ${reshaping} == "TRUE" ];
-#then
-#  echo "Reshaping: combining all activity columns into one file"
-#  mkdir "${prefixP}""/Stacked_Matrix"
-#  "${working_dir}"/Reshape_toCellTF_perGene -i "${prefixP}"/Gene_TF_matrices/ -o "${prefixP}"/Stacked_Matrix/
-#fi
 
 # Clean-Up
 rm "${affinity}"
