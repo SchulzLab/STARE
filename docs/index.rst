@@ -13,5 +13,6 @@ STARE - Look into TF regulation on gene level leveraging an adapted Activity-By-
    Affinity_Summarisation.rst
    Separate_ABC.rst
    Binary_Reshape.rst
+   PatchNotes.rst
    Troubleshooting.rst
    Reference.rst

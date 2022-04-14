@@ -47,7 +47,7 @@ The following schema should give you an overview of STARE's function and what se
 If you want to test your installation and try out some examples, we have the *Code/runTestCases.sh* script for you. It serves the following purposes:
 
 - It gives examples on how to run STARE and which flags to use. To get inspiration have a look at the individual test commands. The list of tests is not exhaustive, you can of course combine the options in a different way.
-- It also compares the output of its test runs against pre-computed results in terms of content and quantitiy to make sure that the installation worked correctly (**/Test/Test_Controls/**). It will tell you with a subtle ERROR massage if something went wrong.
+- It also compares the output of its test runs against pre-computed results in terms of content and quantitiy to make sure that the installation worked correctly (**/Test/Test_Controls/**). It will tell you with a subtle ERROR massage if something went wrong. Test_V16 doesn't have a control, because its output is system-dependent.
 - You can see examples of how the input files are formatted in **/Test/Test_Data/**.
 
 The paths are relative, you should be able to call the test suite from anywhere::
@@ -85,7 +85,7 @@ The table below provides the list of all input data (together with their corresp
    -b / --bed_file, Bed-file containing your candidate regions. Headers are allowed if they start with #.
    -g / --genome, Genome fasta file in RefSeq format.
    -p / --psem **or** -s / --pscm, Either one of the provided PSEMs (Position Specific Energy Matrix) or an own PSCM (Position Specific Count Matrix) in transfac format which will then be automatically converted to PSEM using the sequence content of the --bed_file as background. You can optionally also specify a different GC-content with the -y flag as described below. For details see `PSEMs and PSCMs <https://stare.readthedocs.io/en/latest/PSEMs_and_PSCMs.html>`_.
-   -a / --annotation, Gene annotation file in gtf-format.
+   -a / --annotation, Gene annotation file in gtf-format (for example from `Gencode <https://www.gencodegenes.org/>`_). It is advised to give the full annotation and not only a subset in particular when running the adapted ABC-scoring approach as we require the information of all genes.
    -o / --output, Name of the output folder. The folder will be created and can't already exists to prevent overwriting of files. All output files will have the folder name as prefix.
 
 

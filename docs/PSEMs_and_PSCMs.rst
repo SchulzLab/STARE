@@ -1,16 +1,9 @@
 ============
-PSEMs and PSCMs
+PSCMs and PSEMs
 ============
 
-The TF affinities are calculated with `TRAP <https://doi.org/10.1093/bioinformatics/btl565>`_. TRAP is motif based and requires Position Specific Energy Matrices (PSEMs). They represent the mismatch energy of a given motif. The authors of TRAP provide a tool which converts Position Specific Count Matrices (PSCMs) to PSEMs. We provide a collection of PSEMs for different species, which you can find at https://github.com/SchulzLab/STARE/tree/main/PWMs. In the directory **1.0/** you find the converted PSEMs of vertebrate TFs. In **2.0** there are two files for each species, one with a collection from different databases *'_all'*, and one where the redundant ones were removed. In **2.1/** there are merged and clustered collections of PSEMs. The original PSCMs were collected from :
 
-- `JASPAR <https://jaspar.genereg.net/>`_: Sandelin, A. “JASPAR: An Open-Access Database for Eukaryotic Transcription Factor Binding Profiles.” Nucleic Acids Research 32, no. 90001 (January 1, 2004): 91D – 94. https://doi.org/10.1093/nar/gkh012.
-
-- `HOCOMOCO <https://hocomoco11.autosome.ru/>`_ : Kulakovskiy, Ivan V., Yulia A. Medvedeva, Ulf Schaefer, Artem S. Kasianov, Ilya E. Vorontsov, Vladimir B. Bajic, and Vsevolod J. Makeev. “HOCOMOCO: A Comprehensive Collection of Human Transcription Factor Binding Sites Models.” Nucleic Acids Research 41, no. D1 (January 1, 2013): D195–202. https://doi.org/10.1093/nar/gks1089.
-
-- and from Kheradpour, Pouya, and Manolis Kellis. “Systematic Discovery and Characterization of Regulatory Motifs in ENCODE TF Binding Experiments.” Nucleic Acids Research 42, no. 5 (March 1, 2014): 2976–87. https://doi.org/10.1093/nar/gkt1249.
-
-If your TF of interest are not represented in any of the provided collections, you can hand STARE your PSCMs and it will automatically convert them. The PSCMs need to be in transfac-format, an example from `JASPAR <https://jaspar.genereg.net/>`_::
+There are two possible formats to provide TF motifs to STARE: either Position Specific Count Matrices (PSCMs) in transfac-format or Position Specific Energy Matrices (PSEMs). The more common ones are the PSCMs, which you can get from different public databases. Internally, STARE requires PSEMs to calculate TF affinities with `TRAP <https://doi.org/10.1093/bioinformatics/btl565>`_, and it will automatically convert your PSCMs to PSEMs. The background GC-content to construct the PSEMs will be taken from your provided --bed_file. You can also specify a fixed GC-content with the -y flag. Here's an example for a transfac PSEM from `JASPAR <https://jaspar.genereg.net/>`_::
 
 	AC MA0006.1
 	XX
@@ -34,7 +27,18 @@ If your TF of interest are not represented in any of the provided collections, y
 	XX
 	//
 
-The conversion also requires the average GC-content of the organism. Here a selection:
+We have multiple motif collections available, which you can find at https://github.com/SchulzLab/STARE/tree/main/PWMs. The newest ones for human and mouse in **2.2/** represent non-redundant motifs collected from:
+
+- `JASPAR 2022 <https://jaspar.genereg.net/>`_: Castro-Mondragon, Jaime A, Rafael Riudavets-Puig, Ieva Rauluseviciute, Roza Berhanu Lemma, Laura Turchi, Romain Blanc-Mathieu, Jeremy Lucas, et al. “JASPAR 2022: The 9th Release of the Open-Access Database of Transcription Factor Binding Profiles.” Nucleic Acids Research 50, no. D1 (January 7, 2022): D165–73. https://doi.org/10.1093/nar/gkab1113.
+
+- `HOCOMOCO v11 <https://hocomoco11.autosome.ru/>`_ : Kulakovskiy, Ivan V, Ilya E Vorontsov, Ivan S Yevshin, Ruslan N Sharipov, Alla D Fedorova, Eugene I Rumynskiy, Yulia A Medvedeva, et al. “HOCOMOCO: Towards a Complete Collection of Transcription Factor Binding Models for Human and Mouse via Large-Scale ChIP-Seq Analysis.” Nucleic Acids Research 46, no. D1 (January 4, 2018): D252–59. https://doi.org/10.1093/nar/gkx1106.
+
+- and from Kheradpour, Pouya, and Manolis Kellis. “Systematic Discovery and Characterization of Regulatory Motifs in ENCODE TF Binding Experiments.” Nucleic Acids Research 42, no. 5 (March 1, 2014): 2976–87. https://doi.org/10.1093/nar/gkt1249.
+
+
+We have older collections of PSEMs, constructed based on the overall GC-content of the respective organism. In the directory **1.0/** you find the converted PSEMs of vertebrate TFs. In **2.0/** there are two files for each species, one with a collection from different databases *'_all'*, and one where the redundant ones were removed. In **2.1/** there are merged and clustered collections of PSEMs.
+
+If you wish to transform your PSCMs manually with the organism's GC-content as background, here is a selection:
 
 - *Homo sapiens* = 0.41
 - *Mus musculus* = 0.42
@@ -42,7 +46,7 @@ The conversion also requires the average GC-content of the organism. Here a sele
 - *Drosophila melanogaster* = 0.43
 - *Caenorhabditis elegans* = 0.36
 
-You can also convert the PSCMs in advance ::
+And the command is the following ::
 
    ./Code/PSCM_to_PSEM path_to_PSCM GC-content > out_path
 
