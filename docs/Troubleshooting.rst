@@ -18,7 +18,7 @@ STARE relies heavily on the gtf-file you provide. It will consider all entries w
 
 The *chr* prefix
 ******************
-We rely on `bedtools <https://bedtools.readthedocs.io/en/latest/>`_ for intersection of regions. Bedtools requires that the naming scheme for the first column is identical, meaning that either both files have a chr-prefix, or neither of them. A mixture will cause an error. STARE will check the files in advance and should take care of this for you. But if there is an unexpected format or the scaffolds don't start with "chr", this will likely fail. This affects the region file (-b), gene annotation (-a), sequence file (-g) and regions to exclude (-x). It might be worth ensuring consistency for the chromosome name in each of the files, if you suspect that to be the issue.
+We rely on `bedtools <https://bedtools.readthedocs.io/en/latest/>`_ for intersection of regions. Bedtools requires that the naming scheme for the first column is identical, meaning that either both files have a chr-prefix, or neither of them. A mixture will cause an error. STARE will check the files in advance and should take care of this for you. But if there is an unexpected format or the first scaffolds don't start with "chr" while the others do, this will likely fail. This affects the region file (-b), gene annotation (-a), sequence file (-g) and regions to exclude (-x). It might be worth ensuring consistency for the chromosome name in each of the files, if you suspect that to be the issue.
 
 Is it compressed?
 ******************
