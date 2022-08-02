@@ -82,7 +82,7 @@ The table below provides the list of all input data (together with their corresp
    :header: "Flag", "Description"
    :widths: 18, 40
 
-   -b / --bed_file, Bed-file containing your candidate regions. Headers are allowed if they start with #.
+   -b / --bed_file, Bed-file containing your candidate regions. Headers are allowed if they start with #. Usually non-overlapping regions make most sense.
    -g / --genome, Genome fasta file in RefSeq format.
    -p / --psem **or** -s / --pscm, Either one of the provided PSEMs (Position Specific Energy Matrix) or an own PSCM (Position Specific Count Matrix) in transfac format which will then be automatically converted to PSEM using the sequence content of the --bed_file as background. You can optionally also specify a different GC-content with the -y flag as described below. For details see `PSEMs and PSCMs <https://stare.readthedocs.io/en/latest/PSEMs_and_PSCMs.html>`_.
    -a / --annotation, Gene annotation file in gtf-format (for example from `Gencode <https://www.gencodegenes.org/>`_). It is advised to give the full annotation and not only a subset in particular when running the adapted ABC-scoring approach as we require the information of all genes.
