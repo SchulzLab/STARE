@@ -3,7 +3,7 @@ set -e  # To abort the whole script if one function returns an error.
 
 # See https://github.com/SchulzLab/STARE for more information and usage.
 # Adapted from TEPIC: https://github.com/SchulzLab/TEPIC
-help="STARE version 0.1
+help="STARE version 1.0.2
 Usage: ./STARE.sh
 [-b/--bed_file bed file containing open chromatin regions]
 [-g/--genome input fasta file in RefSeq format]
@@ -96,7 +96,7 @@ done
 
 if [ "$print_version" -eq 1 ];
 then
-    echo "STARE version 1.0.1"
+    echo "STARE version 1.0.2"
     exit 1;
 fi
 
@@ -195,7 +195,7 @@ metadatafile=${prefix_path}_metadata.amd.tsv
 # Create metadata file.
 touch "$metadatafile"
 echo "[Description]" >> "$metadatafile"
-echo "process	STARE 1.0.1" >> "$metadatafile"
+echo "process	STARE 1.0.2" >> "$metadatafile"
 echo -e "run_by_user\t""$USER" >> "$metadatafile"
 echo -e "date\t""$d" >> "$metadatafile"
 echo -e "time\t""$t" >> "$metadatafile"
@@ -346,7 +346,7 @@ fi
 startt=`date +%s`
 # Use TRAP to compute transcription factor affinities to the above extracted sequences.
 affinity=${prefix_path}_Affinity.txt
-
+#affinity="/projects/triangulate/work/STARE/Hocker_scHeart/Hocker_Affinities.txt"
 echo "Starting TRAP"
 "${working_dir}"/TRAPmulti "$psems" "${prefix_path}"_FilteredSequences.fa "${prefix_path}"_SeqMeta.txt "$cores" > "${affinity}"
 rm "${prefix_path}"_FilteredSequences.fa

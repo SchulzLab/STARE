@@ -1,24 +1,24 @@
 [Description]
-process	STARE0.1
+process	STARE 1.0.1
 run_by_user	dennis
-date	04_04_22
-time	15_43_08_N
-analysis_id	/Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Code/../Test//Test_V3/Test_V3
+date	08_16_22
+time	14_35_03_N
+analysis_id	/Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Dev_Code/../Test//Test_V3/Test_V3
 
 [Command]
-STARE.sh -g /Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Code/../Test//Test_Data/example_sequence.fa -b /Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Code/../Test//Test_Data/example_regions.bed -o /Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Code/../Test//Test_V3 -p /Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Code/../PWMs/2.0/human_jaspar_hoc_kellis.PSEM -a /Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Code/../Test//Test_Data/example_annotation.gtf -w 3000 -e FALSE -n 4
+STARE.sh -g /Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Dev_Code/../Test//Test_Data/example_sequence.fa -b /Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Dev_Code/../Test//Test_Data/example_regions.bed -o /Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Dev_Code/../Test//Test_V3 -p /Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Dev_Code/../PWMs/2.0/human_jaspar_hoc_kellis.PSEM -a /Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Dev_Code/../Test//Test_Data/example_annotation.gtf -w 3000 -e FALSE -n 4
 
 [Inputs]
-region_file	/Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Code/../Test//Test_Data/example_regions.bed
+region_file	/Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Dev_Code/../Test//Test_Data/example_regions.bed
 signal_column	4
 
 [References]
-genome_reference	/Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Code/../Test//Test_Data/example_sequence.fa
-psems	/Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Code/../PWMs/2.0/human_jaspar_hoc_kellis.PSEM
-genome_annotation	/Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Code/../Test//Test_Data/example_annotation.gtf
+genome_reference	/Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Dev_Code/../Test//Test_Data/example_sequence.fa
+psems	/Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Dev_Code/../PWMs/2.0/human_jaspar_hoc_kellis.PSEM
+genome_annotation	/Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Dev_Code/../Test//Test_Data/example_annotation.gtf
 
 [Output path]
-/Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Code/../Test//Test_V3
+/Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Dev_Code/../Test//Test_V3
 
 [Parameters]
 cores	1

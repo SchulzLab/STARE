@@ -1,29 +1,29 @@
 [Description]
-process	STARE0.1
+process	STARE 1.0.1
 run_by_user	dennis
-date	04_04_22
-time	15_43_29_N
-analysis_id	/Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Code/../Test//Test_V10/Test_V10
+date	08_16_22
+time	14_35_11_N
+analysis_id	/Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Dev_Code/../Test//Test_V10/Test_V10
 
 [Command]
-STARE.sh -g /Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Code/../Test//Test_Data/example_sequence_chr21part.fa -b /Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Code/../Test//Test_Data/ABC_example_regions.bed -o /Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Code/../Test//Test_V10 -p /Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Code/../PWMs/2.0/human_jaspar_hoc_kellis.PSEM -a /Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Code/../Test//Test_Data/ABC_example_annotation.gtf -w 500000 -n 4+ -t 0 -f /Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Code/../Test//Test_Data/ABC_example_HiCFiles/ -k 5000 -t 0 -q False
+STARE.sh -g /Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Dev_Code/../Test//Test_Data/example_sequence_chr21part.fa -b /Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Dev_Code/../Test//Test_Data/ABC_example_regions.bed -o /Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Dev_Code/../Test//Test_V10 -p /Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Dev_Code/../PWMs/2.0/human_jaspar_hoc_kellis.PSEM -a /Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Dev_Code/../Test//Test_Data/ABC_example_annotation.gtf -w 500000 -n 4+ -t 0 -f /Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Dev_Code/../Test//Test_Data/ABC_example_HiCFiles/ -k 5000 -t 0 -q False
 
 [Inputs]
-region_file	/Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Code/../Test//Test_Data/ABC_example_regions.bed
+region_file	/Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Dev_Code/../Test//Test_Data/ABC_example_regions.bed
 signal_column	4+
 
 [References]
-genome_reference	/Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Code/../Test//Test_Data/example_sequence_chr21part.fa
-psems	/Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Code/../PWMs/2.0/human_jaspar_hoc_kellis.PSEM
-genome_annotation	/Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Code/../Test//Test_Data/ABC_example_annotation.gtf
+genome_reference	/Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Dev_Code/../Test//Test_Data/example_sequence_chr21part.fa
+psems	/Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Dev_Code/../PWMs/2.0/human_jaspar_hoc_kellis.PSEM
+genome_annotation	/Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Dev_Code/../Test//Test_Data/ABC_example_annotation.gtf
 
 [Output path]
-/Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Code/../Test//Test_V10
+/Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Dev_Code/../Test//Test_V10
 
 [Parameters]
 cores	1
 window	500000
-path with hi-c contact files	/Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Code/../Test//Test_Data/ABC_example_HiCFiles/
+path with hi-c contact files	/Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Dev_Code/../Test//Test_Data/ABC_example_HiCFiles/
 bin size of hi-c contacts	5000
 ABC-score cut-off	0
 Use pseudocount for contact frequency	TRUE

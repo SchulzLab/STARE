@@ -1,6 +1,17 @@
-============
+
 Patch notes
 ============
+
+v1.0.2
+===============
+
+   - Genes which don't have any regions in their defined window to sum up the TF affinities from will no longer be written to output, only to the discarded_Genes.txt file.
+   - Restructured the processing to be more efficient for many activity columns.
+   - Added a CMakeList-file to allow compilation with CMake.
+   - Window size can now also be given as scientific notation (e.g. 1e05). Before, this could have been an issue if system calls from other programs automatically converted large integers to scientific notation.
+   - Fixed a bug that caused unnecessary memory consumption. Further edited some data structures to reduce memory usage.
+   - Fixed a system-dependent bug when the limit of open streams was reached. Out-streams are now always closed after writing.
+   - Fixed a bug related to the thread-safety of streams.
 
 
 v1.0.1

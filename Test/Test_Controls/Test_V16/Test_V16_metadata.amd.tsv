@@ -1,0 +1,37 @@
+[Description]
+process	STARE 1.0.1
+run_by_user	dennis
+date	08_16_22
+time	14_35_14_N
+analysis_id	/Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Dev_Code/../Test//Test_V16/Test_V16
+
+[Command]
+STARE.sh -g /Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Dev_Code/../Test//Test_Data/example_sequence_chr21part.fa -b /Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Dev_Code/../Test//Test_Data/ABC_example_regions.bed -o /Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Dev_Code/../Test//Test_V16 -s /Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Dev_Code/../Test//Test_Data/Jaspar_transfac.txt -a /Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Dev_Code/../Test//Test_Data/ABC_example_annotation.gtf -w 500000 -n 4+ -f /Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Dev_Code/../Test//Test_Data/ABC_example_HiCFiles/ -k 5000 -t 0 -z True
+
+[Inputs]
+region_file	/Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Dev_Code/../Test//Test_Data/ABC_example_regions.bed
+signal_column	4+
+
+[References]
+genome_reference	/Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Dev_Code/../Test//Test_Data/example_sequence_chr21part.fa
+pscms	/Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Dev_Code/../Test//Test_Data/Jaspar_transfac.txt
+CG-content	automatic from bed_file
+genome_annotation	/Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Dev_Code/../Test//Test_Data/ABC_example_annotation.gtf
+
+[Output path]
+/Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Dev_Code/../Test//Test_V16
+
+[Parameters]
+cores	1
+window	500000
+path with hi-c contact files	/Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Dev_Code/../Test//Test_Data/ABC_example_HiCFiles/
+bin size of hi-c contacts	5000
+ABC-score cut-off	0
+Use pseudocount for contact frequency	TRUE
+Use adaptedABC version	TRUE
+Window size for the adaptedABC	5000000
+Reshaping to binary output	TRUE
+
+[Metrics]
+Number of provided regions	7
+Number of considered psems	     746

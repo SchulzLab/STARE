@@ -5,7 +5,6 @@
 # include <iostream>
 # include <string>
 # include <fstream>
-# include <sstream>
 # include <unordered_set>
 # include <getopt.h>
 # include <vector>
@@ -32,8 +31,8 @@ int main(int argc, char **argv) {
     for (int i = 1; i < argc; ++i) {
         string current_arg;
         current_arg = argv[i];
-        for (string h_flag : h_flags) {
-            if (!current_arg.compare(h_flag)) {
+        for (const string& h_flag : h_flags) {
+            if (current_arg == h_flag) {
                 cout << parameter_help;
                 return 1;
             }
@@ -48,13 +47,13 @@ int main(int argc, char **argv) {
     string i_input_file, o_output_file, d_row_file;
     static struct option long_options[] =
             {
-                    {"i", required_argument, NULL, 'i'},
-                    {"o",   required_argument, NULL, 'o'},
-                    {"d",   required_argument, NULL, 'd'},
+                    {"i", required_argument, nullptr, 'i'},
+                    {"o",   required_argument, nullptr, 'o'},
+                    {"d",   required_argument, nullptr, 'd'},
             };
 
     int arg;
-    while ((arg = getopt_long_only(argc, argv, "i:o:d:", long_options, NULL)) != -1) {
+    while ((arg = getopt_long_only(argc, argv, "i:o:d:", long_options, nullptr)) != -1) {
         switch (arg) {
             case 'i':
                 i_input_file = optarg;
@@ -73,8 +72,8 @@ int main(int argc, char **argv) {
     }
 
     // Check if there is an argument for the required parameters.
-    for (string p: {i_input_file, o_output_file, d_row_file}){
-        if (p.size() < 1){
+    for (const string& p: {i_input_file, o_output_file, d_row_file}){
+        if (p.empty()){
             cout << "Required parameter missing" << endl;
             cout << parameter_help << endl;
             return 1;

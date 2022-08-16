@@ -15,18 +15,34 @@ Installing STARE
 
 *We are working on bringing STARE to Bioconda. But until then, you need to do the installation manually.* 
 
+**Requirements**
+
 The following tools/libraries must be installed in advance:
 
 - `bedtools <https://github.com/arq5x/bedtools2>`_ Please make sure to add the bedtools installation to your path
-- g++ to compile C++ scripts 
-- openmp for parallel computing; unfortunately, the installation is system-dependent and we didn't yet find a one-size-fits-all solution
+- openmp for parallel computing; unfortunately, the installation is system-dependent and we didn't yet find a one-size-fits-all solution. MacOS usually also requires llvm. 
 - `Boost C++ Library <https://www.boost.org/>`_
+- `CMake <https://cmake.org/download/>`_ if you want to use it for compilation, otherwise you need g++.
 
 Once you got all of the above installed, you can clone the GitHub repository::
 
     git clone https://github.com/SchulzLab/STARE.git
 
-or download the source code and unzip it. You will find two scripts in **/Code**: *compile_STARE_macOS.sh* and *compile_STARE_Linux.sh* which should compile the C++ scripts for your platform if you run them. The paths are relative, you can call them from any directory::
+or download the source code and unzip it.
+
+**Compilation with CMake**
+
+The (theoretically) easier way for compilation is to use CMake. To do so, navigate into the /Code directory, and configure the project::
+   
+   cmake .
+
+If that worked fine you can build the project, which should compile everything for you::
+
+   cmake --build .
+
+**Compilation with predefined commands** 
+
+If you don't want to use CMake, there's the option to run scripts with compilation commands for MacOS and Linux based on g++. There are two scripts in **/Code**: *compile_STARE_macOS.sh* and *compile_STARE_Linux.sh* which should compile the C++ scripts for your platform if you run them. The paths are relative, you can call them from any directory::
 
     ./Code/compile_STARE_macOS.sh
 
@@ -146,6 +162,8 @@ We provide a small bash script that can produce those files from a .hic-file, us
 
 Specifying the chromosomes is optional, by default chr1-22 will be written. You can give a range or individual ones as comma-separated (e.g. 1-22 or 1,5,7,X). Be aware that we currently don't catch all combinations of chromosome options. Bin size defaults to 5kb. 
 
+If you don't have matching contact data at hand, the average Hi-C matrix provided by `Fulco et al. (2019) <https://doi.org/10.1038/s41588-019-0538-0>`_ was always a good substitution in our hands (ftp://ftp.broadinstitute.org/outgoing/lincRNA/average_hic/average_hic.v2.191020.tar.gz, ~20GB, folder structure has to be adapted as described above). 
+
 -r / --existing_abc
 ------------------
 If you have multiple files matching the columns specified with -n just give the path to one of them and STARE will search the directory to find the other files matching to the remaining columns. This of course omits the need to provide the other ABC-flags. In theory you can also give a region-gene mapping on your own. If you do so, the file requires three columns with the following headers:
@@ -178,12 +196,19 @@ Gene-TF-matrices
 
 The gene-TF-matrices will always have the same format.
 
- - *Pancake_TF_Gene_Affinities.txt.gz*: Matrix of TF affinities summarised per gene, with the genes as rows and TFs as columns. It has two additional columns with the number of peaks considered for the gene, as well as the average peak distance.
+ - *Pancake_TF_Gene_Affinities.txt.gz*: Matrix of TF affinities summarised per gene, with the genes as rows and TFs as columns. It has three additional columns with the number of peaks considered for the gene, the average peak distance and the average peak size.
  - *Pancake_discarded_Genes.txt*: Lists all genes where no TF affinities could be calculated, with a note indicating why.
 
 Output per activity column (-n)
 ===============
 
 You will get one set of output files for each activity column. The files will be named according to the header of those columns, or according to their index, if you didn't have a header. For example, if one of your activity columns was named *sirup*, your gene-TF matrix file would be *Pancake_TF_Gene_Affinities_sirup.txt.gz*.
+
+***************
+Computational power and parallelisation
+***************
+
+As you can imagine depending on the number of peaks, genes and activity columns, the calculations can get quite heavy on a computer's memory. In general, unsurprisingly, it is advisable to run STARE on a computer cluster. We aimed to have STARE running efficiently, which also means that some parts can be run in parallel. Note however, that especially for the ABC-scoring part, more provided cores will also mean more required memory. The read-in of the chromatin contact data is by far the most time-consuming part, which is why we decided to have this in parallel. As consequence, if you don't have that much RAM available, set the number of cores to 1. That also depends on how sparse the contact data is. For example, reading chr1 of a K562 Hi-C data set requires ~1.2 GB, while it takes ~11.6 GB from the average Hi-C matrix from Fulco et al. (2019).
+
 
 
