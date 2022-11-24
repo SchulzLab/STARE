@@ -10,9 +10,9 @@
 // buffer. Institute of Cardiovascular Regeneration - Goethe University Frankfurt
 
 /*
-* MacOS:
+* Compilation for MacOS:
 * g++ TRAPmulti.cpp -Xpreprocessor -fopenmp -lomp -O3 -std=c++11 -o TRAPmulti
-* Linux:
+* Compilation for Linux:
 * g++ TRAPmulti.cpp -fopenmp -O3 -std=c++11 -o TRAPmulti
 */
 

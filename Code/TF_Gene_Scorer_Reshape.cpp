@@ -22,12 +22,11 @@
  * all the input parameters. The region-gene mapping is either done with overlapping the regions with a defined gene
  * window or is taken from the ABC-scoring (if done in advance).
  *
- * MacOS:
+ * Compilation for MacOS:
  * g++ TF_Gene_Scorer.cpp STARE_MiscFunctions.cpp -Xpreprocessor -fopenmp -lomp -O3 -std=c++11 -o TF_Gene_Scorer
- * Linux:
+ * Compilation for Linux:
  * g++ TF_Gene_Scorer.cpp STARE_MiscFunctions.cpp -fopenmp -O3 -std=c++11 -o TF_Gene_Scorer
  *
- * ./TF_Gene_Scorer -a ../Test/example_annotation.gtf -i region-TF-affinity-file -o output-dir -p ../PWMs/2.0/human_jaspar_hoc_kellis.PSEM -w 50000 -e TRUE
  *
  * Part of STARE: https://github.com/SchulzLab/STARE
  */
@@ -435,6 +434,13 @@ int main(int argc, char **argv) {
                                 non_comm.erase(remove(non_comm.begin(), non_comm.end(), '#'), non_comm.end());
                                 abc_header_map[non_comm] = c;
                             }
+                            for (const string &needed : {"Ensembl ID", "PeakID", "intergenicScore"}) {
+                                if (abc_header_map.find(needed) == abc_header_map.end()) {
+                                    cout << "ERROR missing column in the interaction file: " << needed << endl;
+                                    cout << abc_files[abc] << endl;
+                                    return 1;
+                                }
+                            }
                         } else if (!abc_row.empty()) {
                             // All peaks in the ABC files must exist in the TRAP file.
                             vector <string> columns = SplitTabLine(abc_row);
@@ -467,7 +473,7 @@ int main(int argc, char **argv) {
     ofstream window_out(temp_window_file);
     Test_outfile(window_out, temp_window_file);
     for (auto const &gene : tss_map) {
-        int window_start = stoi(gene.second[1]) - window_size;
+        int window_start = stoi(gene.second[1]) - window_size - 1;  // gtf is 1-based, bedtools 0-based.
         if (window_start < 0) {
             window_start = 0;
         }
@@ -662,7 +668,7 @@ int main(int argc, char **argv) {
                     int hyphon = region_string.find('-', 0);
                     int start = stoi(region_string.substr(colon + 1, hyphon - colon - 1));
                     int end = stoi(region_string.substr(hyphon + 1));
-                    int distance = min(abs(gene_tss - start), abs(gene_tss - end));
+                    int distance = GetDistance(start, end, gene_tss);
                     int peak_size = abs(end - start);
 
                     vector<double> affinity_scalers(out_iters, 1);  // Check the conditions and fill once.

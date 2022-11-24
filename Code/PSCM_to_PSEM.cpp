@@ -11,6 +11,11 @@
 // Modified by Dennis Hecker
 // Institute of Cardiovascular Regeneration
 
+/*
+ * Compilation:
+ * g++ PSCM_to_PSEM.cpp -std=c++11 -o PSCM_to_PSEM
+ */
+
 #include<stdio.h>
 #include<cmath>
 #include<stdlib.h>

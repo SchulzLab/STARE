@@ -1,8 +1,8 @@
 [Description]
 process	STARE 1.0.1
 run_by_user	dennis
-date	08_16_22
-time	14_34_53_N
+date	11_08_22
+time	08_58_21_N
 analysis_id	/Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Dev_Code/../Test//Test_V1/Test_V1
 
 [Command]
@@ -23,6 +23,7 @@ genome_annotation	/Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Dev_Code/../Test//Tes
 [Parameters]
 cores	1
 window	3000
+tss_mode	all_tss
 decay	TRUE
 
 [Metrics]

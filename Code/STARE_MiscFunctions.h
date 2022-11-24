@@ -20,22 +20,24 @@
 //    static const int precision = 10;
 //};
 
-std::string SetOptionalInput(std::string input_string, std::string default_value);
+int GetDistance(int start, int end, int other);
 
-bool SetBoolInput(std::string input_string, bool default_value);
+std::string SetOptionalInput(const std::string& input_string, std::string default_value);
 
-bool Chr_sorter(std::string first, std::string second);
+bool SetBoolInput(const std::string& input_string, bool default_value);
 
-int FilePeek(std::string file_name);
+bool Chr_sorter(const std::string& first, const std::string& second);
 
-std::vector <std::string> SplitTabLine(std::string row);
+int FilePeek(const std::string& file_name);
+
+std::vector <std::string> SplitTabLine(const std::string& row);
 
 std::string GetStdoutFromCommand(std::string cmd);
 
-void Test_outfile(std::ofstream &out_file, std::string out_path);
+void Test_outfile(std::ofstream &out_file, const std::string& out_path);
 
-void GzipFile(std::string file);
+void GzipFile(const std::string& file);
 
-std::unordered_map<int, std::string> FileHeaderMapping(std::string file_name, std::vector<int>);
+std::unordered_map<int, std::string> FileHeaderMapping(const std::string& file_name, const std::vector<int>&);
 
 #endif //STARE_MISCFUNCTIONS_H

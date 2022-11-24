@@ -3,28 +3,30 @@ set -e  # To abort the whole script if one function returns an error.
 
 # See https://github.com/SchulzLab/STARE for more information and usage.
 # Adapted from TEPIC: https://github.com/SchulzLab/TEPIC
-help="STARE version 1.0.2
+version_num="1.0.3"
+help="STARE version ""$version_num""
 Usage: ./STARE.sh
 [-b/--bed_file bed file containing open chromatin regions]
+[-a/--annotation gene annotation file in gtf-format]
 [-g/--genome input fasta file in RefSeq format]
 [-s/--pscm file with PSCMs in transfac format] OR [-p/--psem file with PSEMs of TFs]
-[-a/--annotation gene annotation file in gtf-format, required to generate the gene view]
 [-o/--output prefix_path of output files]\n
 Optional parameters:
-[-u/--genes file with rows of gene IDs/symbols to limit the output (else all in gtf)]
+[-w/--window window size around TSS for mapping regions to genes (default 50KB; 5MB for ABC-mode)]
 [-n/--column column in the -b file containing the average per base signal within a peak, start counting at 1]
-[-y/--gc_content Mean GC-content to calculate PSEMs, by default this is automatically derived from your bed_file]
 [-c/--cores number of cores to use (default 1)]
 [-x/--exclude_bed bed-file with regions to exclude (e.g. blacklisted regions)]
-[-w/--window window size around TSS for mapping regions to genes (default 50KB; 5MB for ABC-mode)]
-[-e/--decay indicating whether exponential distance decay should be used (default TRUE, but not used in ABC-mode)]
-[-f/--contact_folder folder with normalized Hi-C contact files for each chromosome in coordinate format. Expects gzipped files.]
+[-u/--genes file with rows of gene IDs/symbols to limit the output (else all in gtf)]
+[-i/--tss_mode 'all_tss' to average across all annotated TSS for ABC-scoring or '5_tss' to use only the 5' TSS (default all_tss)]
+[-q/--adapted_abc whether to use the adapted ABC-score (default True)]
+[-f/--contact_folder folder with normalized Hi-C contact files for each chromosome in coordinate format, expects gzipped files. Set to False to use a contact estimate based on distance.]
 [-k/--bin_size bin-size of the Hi-C files]
 [-t/--cutoff cut-off for the ABC-score (default 0.02), set to 0 to get all scored interactions]
-[-q/--adapted_abc whether to use the adapted ABC-score (default True)]
-[-m/--enhancer_window window size around enhancers for the -q adjustment (default 5MB, minimally set to -w)]
 [-d/--pseudocount whether to use pseudocount for the contact frequency in the ABC-model (default True)]
+[-m/--enhancer_window window size around enhancers for the -q adjustment (default 5MB, minimally set to -w)]
 [-r/--existing_abc ABC-scoring file, if already calculated once for this input to avoid redundant calculation]
+[-y/--gc_content Mean GC-content to calculate PSEMs, by default this is automatically derived from your bed_file]
+[-e/--decay indicating whether exponential distance decay should be used (default TRUE, but not used in ABC-mode)]
 [-z/--reshape write a binary output (default False), optional input for GAZE]"
 
 # ------------------------------------------------------------------------------------------------------
@@ -42,6 +44,7 @@ pscms=""
 pscm_cg=""
 genes="0"
 column="0"
+tss_mode="all_tss"
 window=""
 decay="TRUE"
 hic_contactfolder=""
@@ -59,7 +62,7 @@ die() { echo "$*" >&2; exit 2; }  # complain to STDERR and exit with error
 needs_arg() { if [ -z "$OPTARG" ]; then die "No arg for --$OPT option"; fi; }  # Required to enable long options.
 
 # Parsing command line.
-while getopts hvg:b:o:c:p:s:y:u:n:a:w:e:f:k:t:r:x:z:d:q:m:-: OPT; do
+while getopts hvg:b:o:c:p:s:y:u:n:i:a:w:e:f:k:t:r:x:z:d:q:m:-: OPT; do
   if [ "$OPT" = "-" ]; then   # long option: reformulate OPT and OPTARG
     OPT="${OPTARG%%=*}"       # extract long option name
     OPTARG="${OPTARG#$OPT}"   # extract long option argument (may be empty)
@@ -77,6 +80,7 @@ while getopts hvg:b:o:c:p:s:y:u:n:a:w:e:f:k:t:r:x:z:d:q:m:-: OPT; do
   y | gc_content)	needs_arg; pscm_cg=$OPTARG;;
   u | genes) needs_arg; genes=$OPTARG;;
 	n | column)	needs_arg; column=$OPTARG;;
+  i | tss_mode) needs_arg; tss_mode=$OPTARG;;
 	a | annotation)	needs_arg; annotation=$OPTARG;;
 	w | window)	needs_arg; window=$OPTARG;;
 	e | decay)	needs_arg; decay=$OPTARG;;
@@ -96,7 +100,7 @@ done
 
 if [ "$print_version" -eq 1 ];
 then
-    echo "STARE version 1.0.2"
+    echo "STARE version ""$version_num"
     exit 1;
 fi
 
@@ -137,11 +141,20 @@ then
 fi
 
 if [ -n "$hic_contactfolder" ] || [ -n "$hic_binsize" ] && [[ "$existing_abc" == "0" ]];  # With an existing ABC-file, the other flags are ignored.
-then
-  if [ -z "$hic_contactfolder" ] || [ -z "$hic_binsize" ] || [ -z "$column" ];
+then  # If the hic-contactfolder is set to false we can run the ABC-scoring with contact estimate.
+  if [ "${hic_contactfolder}" != "FALSE" ] || [ "${hic_contactfolder}" != "False" ] || [ "${hic_contactfolder}" != "false" ] || [ "${hic_contactfolder}" != "F" ] || [ "${hic_contactfolder}" != "0" ];
   then
-    echo "For the ABC-score calculation the column with the peak signal (-n/--column), the path to the normalized contact files (-f/--contact_folder) as well as the the bin size (-k/--bin_size) are required."
-    exit 1;
+    if [ -z "$hic_contactfolder" ] || [ -z "$hic_binsize" ] || [ -z "$column" ];
+    then
+      echo "For the ABC-score calculation the column with the peak signal (-n/--column), the path to the normalized contact files (-f/--contact_folder) as well as the the bin size (-k/--bin_size) are required."
+      exit 1;
+    fi
+  else
+    if [ -z "$column" ];
+    then
+      echo "For the ABC-score calculation the column with the peak signal (-n/--column) is required."
+      exit 1;
+    fi
   fi
 fi
 
@@ -174,6 +187,7 @@ then
   adjustedABC="FALSE";
 fi
 
+
 # ------------------------------------------------------------------------------------------------------
 # WRITE METADATA FILE
 # ------------------------------------------------------------------------------------------------------
@@ -195,7 +209,7 @@ metadatafile=${prefix_path}_metadata.amd.tsv
 # Create metadata file.
 touch "$metadatafile"
 echo "[Description]" >> "$metadatafile"
-echo "process	STARE 1.0.2" >> "$metadatafile"
+echo "process	STARE ""$version_num" >> "$metadatafile"
 echo -e "run_by_user\t""$USER" >> "$metadatafile"
 echo -e "date\t""$d" >> "$metadatafile"
 echo -e "time\t""$t" >> "$metadatafile"
@@ -205,35 +219,35 @@ echo "[Command]" >> "$metadatafile"
 echo "STARE.sh ""$*" >> "$metadatafile"
 echo "" >> "$metadatafile"
 echo "[Inputs]" >> "$metadatafile"
-echo -e "region_file\t""$regions" >> "$metadatafile"
+echo -e "-b region_file\t""$regions" >> "$metadatafile"
 if [ -n "$column" ] ;
 then
-	echo -e "signal_column\t""$column" >> "$metadatafile"
+	echo -e "-n signal_column\t""$column" >> "$metadatafile"
 fi
 if [[ "$genes" != "0" ]];
 then
-  echo -e "gene set\t""$genes" >> "$metadatafile"
+  echo -e "-u gene set\t""$genes" >> "$metadatafile"
 fi
 if [ -n "$exclude_regions" ] ;
 then
-	echo -e "excluded regions\t""$exclude_regions" >> "$metadatafile"
+	echo -e "-x excluded regions\t""$exclude_regions" >> "$metadatafile"
 fi
 echo "" >> "$metadatafile"
 echo "[References]" >> "$metadatafile"
-echo -e "genome_reference\t""$genome" >> "$metadatafile"
+echo -e "-g genome_reference\t""$genome" >> "$metadatafile"
 if [ -n "$pscms" ];
 then
-  echo -e "pscms\t""$pscms" >> "$metadatafile"
+  echo -e "-s pscms\t""$pscms" >> "$metadatafile"
   if [ -n "$pscm_cg" ];
   then
-    echo -e "CG-content\t""$pscm_cg" >> "$metadatafile"
+    echo -e "-y GC-content\t""$pscm_cg" >> "$metadatafile"
   else
-    echo -e "CG-content\tautomatic from bed_file" >> "$metadatafile"
+    echo -e "GC-content\tautomatic from bed_file" >> "$metadatafile"
   fi
 else
-  echo -e "psems\t""$psems" >> "$metadatafile"
+  echo -e "-p psems\t""$psems" >> "$metadatafile"
 fi
-echo -e "genome_annotation\t""$annotation">> "$metadatafile"
+echo -e "-a genome_annotation\t""$annotation">> "$metadatafile"
 
 echo "" >> "$metadatafile"
 echo "[Output path]" >> "$metadatafile"
@@ -241,28 +255,29 @@ echo "$prefixP" >> "$metadatafile"
 
 echo "" >> "$metadatafile"
 echo "[Parameters]" >> "$metadatafile"
-echo -e "cores\t""$cores" >> "$metadatafile"
-echo -e "window\t"$window >> "$metadatafile"
+echo -e "-c cores\t""$cores" >> "$metadatafile"
+echo -e "-w window\t"$window >> "$metadatafile"
+echo -e "-i tss_mode\t""$tss_mode" >> "$metadatafile"
 if [ -z "$hic_contactfolder" ] && [[ "$existing_abc" == "0" ]];
 then
-  echo -e "decay\t""$decay" >> "$metadatafile"
+  echo -e "-e decay\t""$decay" >> "$metadatafile"
 fi
 if [ -n "$hic_contactfolder" ] && [[ "$existing_abc" == "0" ]];
 then
-  echo -e "path with hi-c contact files\t""$hic_contactfolder" >> "$metadatafile"
-  echo -e "bin size of hi-c contacts\t""$hic_binsize" >> "$metadatafile"
-  echo -e "ABC-score cut-off\t""$abc_cutoff" >> "$metadatafile"
-  echo -e "Use pseudocount for contact frequency\t""$pseudocount" >> "$metadatafile"
-  echo -e "Use adaptedABC version\t""$adjustedABC" >> "$metadatafile"
-  echo -e "Window size for the adaptedABC\t""$enhancer_window" >> "$metadatafile"
+  echo -e "-f path with hi-c contact files\t""$hic_contactfolder" >> "$metadatafile"
+  echo -e "-k bin size of hi-c contacts\t""$hic_binsize" >> "$metadatafile"
+  echo -e "-t ABC-score cut-off\t""$abc_cutoff" >> "$metadatafile"
+  echo -e "-d Use pseudocount for contact frequency\t""$pseudocount" >> "$metadatafile"
+  echo -e "-q Use adaptedABC version\t""$adjustedABC" >> "$metadatafile"
+  echo -e "-m Window size for the adaptedABC\t""$enhancer_window" >> "$metadatafile"
 fi
 if [[ "$existing_abc" != "0" ]];
 then
-  echo -e "existing ABC-score file that was used\t""$existing_abc" >> "$metadatafile"
+  echo -e "-r existing ABC-score file that was used\t""$existing_abc" >> "$metadatafile"
 fi
 if [[ "$reshaping" == "TRUE" ]];
 then
-  echo -e "Reshaping to binary output\t""$reshaping" >> "$metadatafile"
+  echo -e "-z Reshaping to binary output\t""$reshaping" >> "$metadatafile"
 fi
 
 echo "" >> "$metadatafile"
@@ -345,8 +360,8 @@ fi
 # ------------------------------------------------------------------------------------------------------
 startt=`date +%s`
 # Use TRAP to compute transcription factor affinities to the above extracted sequences.
-affinity=${prefix_path}_Affinity.txt
 #affinity="/projects/triangulate/work/STARE/Hocker_scHeart/Hocker_Affinities.txt"
+affinity=${prefix_path}_Affinity.txt
 echo "Starting TRAP"
 "${working_dir}"/TRAPmulti "$psems" "${prefix_path}"_FilteredSequences.fa "${prefix_path}"_SeqMeta.txt "$cores" > "${affinity}"
 rm "${prefix_path}"_FilteredSequences.fa
@@ -364,7 +379,7 @@ then
   echo "ABC-scoring region-gene interactions"
   mkdir "${prefixP}""/ABC_output"
   abc_prefix_path=${prefixP}"/ABC_output/"${base_prefix}
-  "${working_dir}"/STARE_ABCpp -b "${filteredRegions}"_sorted.bed -n "${column}" -a "${annotation}" -w "${window}" -f "${hic_contactfolder}" -k "${hic_binsize}" -t "${abc_cutoff}" -o "${abc_prefix_path}" -d "${pseudocount}" -q "${adjustedABC}" -m "${enhancer_window}" -c "${cores}" -u "${genes}"
+  "${working_dir}"/STARE_ABCpp -b "${filteredRegions}"_sorted.bed -n "${column}" -a "${annotation}" -w "${window}" -f "${hic_contactfolder}" -k "${hic_binsize}" -t "${abc_cutoff}" -o "${abc_prefix_path}" -d "${pseudocount}" -q "${adjustedABC}" -m "${enhancer_window}" -c "${cores}" -u "${genes}" -i "${tss_mode}"
   existing_abc=${abc_prefix_path}"_ABCpp_scoredInteractions.txt.gz"
 fi
 
@@ -386,3 +401,4 @@ rm "${affinity}"
 rm "${filteredRegions}"_sorted.bed
 
 echo "Congratulations it worked!"
+

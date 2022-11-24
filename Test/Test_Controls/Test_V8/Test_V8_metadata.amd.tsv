@@ -1,12 +1,12 @@
 [Description]
 process	STARE 1.0.1
 run_by_user	dennis
-date	08_16_22
-time	14_35_09_N
+date	11_08_22
+time	08_58_27_N
 analysis_id	/Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Dev_Code/../Test//Test_V8/Test_V8
 
 [Command]
-STARE.sh -g /Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Dev_Code/../Test//Test_Data/example_sequence_chr21part.fa -b /Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Dev_Code/../Test//Test_Data/ABC_example_regions.bed -o /Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Dev_Code/../Test//Test_V8 -p /Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Dev_Code/../PWMs/2.0/human_jaspar_hoc_kellis.PSEM -a /Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Dev_Code/../Test//Test_Data/ABC_example_annotation.gtf -w 500000 -n 4+ -f /Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Dev_Code/../Test//Test_Data/ABC_example_HiCFiles/ -k 5000 -t 0 -u /Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Dev_Code/../Test//Test_Data/example_genes.txt
+STARE.sh -g /Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Dev_Code/../Test//Test_Data/example_sequence_chr21part.fa -b /Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Dev_Code/../Test//Test_Data/ABC_example_regions.bed -o /Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Dev_Code/../Test//Test_V8 -p /Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Dev_Code/../PWMs/2.0/human_jaspar_hoc_kellis.PSEM -a /Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Dev_Code/../Test//Test_Data/ABC_example_annotation.gtf -w 500000 -n 4+ -f /Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Dev_Code/../Test//Test_Data/ABC_example_HiCFiles/ -k 5000 -t 0 -u /Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Dev_Code/../Test//Test_Data/example_genes.txt -i 5_tss
 
 [Inputs]
 region_file	/Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Dev_Code/../Test//Test_Data/ABC_example_regions.bed
@@ -24,6 +24,7 @@ genome_annotation	/Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Dev_Code/../Test//Tes
 [Parameters]
 cores	1
 window	500000
+tss_mode	5_tss
 path with hi-c contact files	/Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Dev_Code/../Test//Test_Data/ABC_example_HiCFiles/
 bin size of hi-c contacts	5000
 ABC-score cut-off	0

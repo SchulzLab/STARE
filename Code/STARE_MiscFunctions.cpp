@@ -12,11 +12,20 @@
  * Part of STARE: https://github.com/SchulzLab/STARE
  */
 
+int GetDistance(int start, int end, int other) {
+    // Assumes that start - end is one region, and gives you the distance to other. other is supposed to be
+    // 1-based, usually a TSS from a TSS file. Returns 0 if other is within the region.
+    int distance = std::min(abs(other - 1 - start), abs(other - end));  // For start subtract 1 to match 0-based.
+    if ((start < other and other < end) or (end < other and other < start)) {
+        distance = 0;
+    }
+    return distance;
+}
 
-std::string SetOptionalInput(std::string input_string, std::string default_value) {
+std::string SetOptionalInput(const std::string& input_string, std::string default_value) {
     // If the input_string is empty, return the default value.
     std::string output_val;
-    if (input_string.size() > 0) {
+    if (!input_string.empty()) {
         output_val = input_string;
     } else {
         output_val = default_value;
@@ -24,9 +33,9 @@ std::string SetOptionalInput(std::string input_string, std::string default_value
     return output_val;
 }
 
-bool SetBoolInput(std::string input_string, bool default_value) {
+bool SetBoolInput(const std::string& input_string, bool default_value) {
     // If the input_string is empty, return the default value.
-    if (input_string.size() == 0) {
+    if (input_string.empty()) {
         return default_value;
     }
     else {
@@ -42,7 +51,7 @@ bool SetBoolInput(std::string input_string, bool default_value) {
     }
 }
 
-bool Chr_sorter(std::string first, std::string second) {
+bool Chr_sorter(const std::string& first, const std::string& second) {
     // Sorts strings of potential ints and chars with the ints in increasing order and the chars at the end.
     std::regex re_chr("^[0-9]+$");
     if (std::regex_match(first, re_chr) and std::regex_match(second, re_chr)){
@@ -56,7 +65,7 @@ bool Chr_sorter(std::string first, std::string second) {
     }
 }
 
-int FilePeek(std::string file_name) {
+int FilePeek(const std::string& file_name) {
     // Looks at the first 5 non-# line in the file and returns its length. Exits when the file can't be opened or
     // when it's empty.
     std::ifstream peek_file(file_name.c_str());
@@ -85,7 +94,7 @@ int FilePeek(std::string file_name) {
     return peek_len;
 }
 
-std::vector<std::string> SplitTabLine(std::string row) {
+std::vector<std::string> SplitTabLine(const std::string& row) {
     // Splits a line by tabs and returns a vector of the strings.
     std::string col_val;
     std::vector<std::string> columns;
@@ -109,13 +118,13 @@ std::string GetStdoutFromCommand(std::string cmd) {
 
     if (stream) {
         while (!feof(stream))
-            if (fgets(buffer, max_buffer, stream) != NULL) data.append(buffer);
+            if (fgets(buffer, max_buffer, stream) != nullptr) data.append(buffer);
         pclose(stream);
     }
     return data;
 }
 
-void Test_outfile(std::ofstream &out_file, std::string out_path) {
+void Test_outfile(std::ofstream &out_file, const std::string& out_path) {
     // Test if the output path is viable.
     if (!out_file) {
         std::cout << "ERROR Can't open the output path, please check carefully:\n" + out_path << std::endl;
@@ -123,7 +132,7 @@ void Test_outfile(std::ofstream &out_file, std::string out_path) {
     }
 }
 
-void GzipFile(std::string file) {
+void GzipFile(const std::string& file) {
     // Call the gzip on a file. If it already exists it is skipped and the warning is printed
     // to stdout. Makes use of the function above for reading in the cout of the command call.
     std::string gzip_out = GetStdoutFromCommand("yes y | gzip " + file);
@@ -132,7 +141,7 @@ void GzipFile(std::string file) {
     }
 }
 
-std::unordered_map<int, std::string> FileHeaderMapping(std::string file_name, std::vector<int> col_indices) {
+std::unordered_map<int, std::string> FileHeaderMapping(const std::string& file_name, const std::vector<int>& col_indices) {
 // Reads the file header and creates a map based on the column names. Header has to start with #, otherwise columns
 // will be named cN.
     std::unordered_map<int, std::string> header_map;
@@ -144,7 +153,7 @@ std::unordered_map<int, std::string> FileHeaderMapping(std::string file_name, st
         for (int c : col_indices) {
             std::string non_whitespace = col_names[c];  // To remove any potential # from the header.
             std::replace(non_whitespace.begin(), non_whitespace.end(), ' ', '_');
-            if (non_whitespace.size() > 0) {  // We can't work with empty strings.
+            if (!non_whitespace.empty()) {  // We can't work with empty strings.
                 header_map[c] = "_" + non_whitespace;
             }
             else {

@@ -2,6 +2,15 @@
 Patch notes
 ============
 
+v1.0.3
+===============
+
+ - We found another improvement over the regular ABC score by including information across all annotated TSS of a gene, which we call the generalised ABC (gABC) score. This is the default option now for the ABC part.
+ - According to the previous point we added a flag (-i / --tss_mode) which allows to decide whether to use all TSS (all_tss) or just the 5' (5_tss).
+ - We added the option to run the ABC-scoring without any chromatin contact data, by setting the -f / --contact_folder to false. The inverse of the distance will then be used as contact estimate.
+ - Now properly handling the 1-based gtf-locations when doing intersections with bedtools.
+
+
 v1.0.2
 ===============
 

@@ -1,12 +1,12 @@
 [Description]
 process	STARE 1.0.1
 run_by_user	dennis
-date	08_16_22
-time	14_35_13_N
+date	11_08_22
+time	08_58_30_N
 analysis_id	/Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Dev_Code/../Test//Test_V15/Test_V15
 
 [Command]
-STARE.sh -g /Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Dev_Code/../Test//Test_Data/example_sequence.fa -b /Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Dev_Code/../Test//Test_Data/example_regions.bed -o /Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Dev_Code/../Test//Test_V15 -s /Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Dev_Code/../Test//Test_Data/Jaspar_transfac.txt -y 0.41 -a /Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Dev_Code/../Test//Test_Data/example_annotation.gtf -w 3000 -x /Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Dev_Code/../Test//Test_Data/example_exclude_regions.bed
+STARE.sh -g /Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Dev_Code/../Test//Test_Data/example_sequence.fa -b /Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Dev_Code/../Test//Test_Data/example_regions.bed -o /Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Dev_Code/../Test//Test_V15 -s /Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Dev_Code/../Test//Test_Data/Jaspar_transfac.txt -y 0.41 -a /Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Dev_Code/../Test//Test_Data/example_annotation.gtf -w 3000 -x /Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Dev_Code/../Test//Test_Data/example_exclude_regions.bed -i 5_tss
 
 [Inputs]
 region_file	/Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Dev_Code/../Test//Test_Data/example_regions.bed
@@ -25,6 +25,7 @@ genome_annotation	/Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Dev_Code/../Test//Tes
 [Parameters]
 cores	1
 window	3000
+tss_mode	5_tss
 decay	TRUE
 
 [Metrics]

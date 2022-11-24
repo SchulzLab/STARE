@@ -13,8 +13,8 @@
  * a txt-file with the length of the longest sequence in the file and the average CG content.
  * Required for TRAP to read the sequence file as stream.
  *
+ * Compilation:
  * g++ ReplaceInvalidChars.cpp -std=c++11 -O3 -o ReplaceInvalidChars
- *  ./ReplaceInvalidChars -i file -o output -d path_for_SeqMeta_file
  *
  *  Part of STARE: https://github.com/SchulzLab/STARE
  */
@@ -25,7 +25,9 @@ int main(int argc, char **argv) {
     // ____________________________________________________________
     // FETCH AND CHECK INPUT ARGS
     // ____________________________________________________________
-    string parameter_help = "-i input sequence file\n-o output file\n-d file to write the sequence metadata to";
+    string parameter_help = "-i input sequence file\n"
+                            "-o output file\n"
+                            "-d file to write the sequence metadata to";
 
     vector<string> h_flags = {"h", "-h", "--h", "help", "-help", "--help"};
     for (int i = 1; i < argc; ++i) {
