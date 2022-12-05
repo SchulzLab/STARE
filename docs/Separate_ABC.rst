@@ -2,7 +2,7 @@
 Separate ABC-scoring
 ============
 
-If you're only interested in the ABC-scored interactions, you can also call that part independently. The flags are the same as for whole STARE, although the long options are not available. Here is an example on how to run it::
+If you're only interested in the ABC-scored interactions, you can also call that part independently. The flags are the same as for whole STARE, although the long options are not available. Here is an example on how to run it (with bioconda call STARE_ABCpp directly)::
 
    ./Code/STARE_ABCpp -b <path_to_bed_file> -n <activity_column(s) -a <gtf_annotation> -o <output_path> -w <window_size> -f <contact_data_dir> -k <bin_size> -t <score_cut_off>
 

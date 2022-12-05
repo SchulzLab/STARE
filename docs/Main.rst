@@ -13,11 +13,18 @@ For the ABC scoring it only needs annotated candidate enhancer and their activit
 Installing STARE
 ***************
 
-*We are working on bringing STARE to Bioconda. But until then, you need to do the installation manually.* 
+**Installation with Bioconda**
 
-**Requirements**
+We wrapped STARE into a Bioconda package which should ease the installation. You can find instructions to set up Bioconda `here <https://bioconda.github.io/>`_, and more details on the `package's website <https://bioconda.github.io/recipes/stare-abc/README.html#package-stare-abc>`_. Once Bioconda is set up you can install STARE either inside or outside of a conda environment::
 
-The following tools/libraries must be installed in advance:
+   conda install stare-abc
+
+Note that if installed with Bioconda, you can call the functions directly, without the preceding "./" or "./Code/".
+
+
+**Manual installation**
+
+The following tools/libraries must be installed in advance (if not using bioconda):
 
 - `bedtools <https://github.com/arq5x/bedtools2>`_ Please make sure to add the bedtools installation to your path
 - openmp for parallel computing; unfortunately, the installation is system-dependent and we didn't yet find a one-size-fits-all solution. MacOS usually also requires llvm. 
@@ -30,7 +37,7 @@ Once you got all of the above installed, you can clone the GitHub repository::
 
 or download the source code and unzip it.
 
-**Compilation with CMake**
+*Compilation with CMake*
 
 The (theoretically) easier way for compilation is to use CMake. To do so, navigate into the /Code directory, and configure the project::
    
@@ -40,7 +47,7 @@ If that worked fine you can build the project, which should compile everything f
 
    cmake --build .
 
-**Compilation with predefined commands** 
+*Compilation with predefined commands*
 
 If you don't want to use CMake, there's the option to run scripts with compilation commands for MacOS and Linux based on g++. There are two scripts in **/Code**: *compile_STARE_macOS.sh* and *compile_STARE_Linux.sh* which should compile the C++ scripts for your platform if you run them. The paths are relative, you can call them from any directory::
 
@@ -63,21 +70,25 @@ The following schema should give you an overview of STARE's function and what se
 If you want to test your installation and try out some examples, we have the *Code/runTestCases.sh* script for you. It serves the following purposes:
 
 - It gives examples on how to run STARE and which flags to use. To get inspiration have a look at the individual test commands. The list of tests is not exhaustive, you can of course combine the options in a different way.
-- It also compares the output of its test runs against pre-computed results in terms of content and quantitiy to make sure that the installation worked correctly (**/Test/Test_Controls/**). It will tell you with a subtle ERROR massage if something went wrong. Test_V16 doesn't have a control, because its output is system-dependent.
+- It also compares the output of its test runs against pre-computed results in terms of content and quantity to make sure that the installation worked correctly (**/Test/Test_Controls/**). It will tell you with a subtle ERROR message if something went wrong. Test_V16 doesn't have a control, because its output is system-dependent.
 - You can see examples of how the input files are formatted in **/Test/Test_Data/**.
 
-The paths are relative, you should be able to call the test suite from anywhere::
+To call the tests, you need to give the path to the **/Test/** directory, if you used bioconda for installation you will need to download that folder and you can call the script directly. You'll also have to give a path to where the output should be written to::
 
-    ./Code/runTestCases.sh
+    ./Code/runTestCases.sh -i <path to /Test/> -o <output path>
 
-You will get a lot of print-outs and each Test will create a folder in **/Test**. If you didn't get any ERROR messages, you should be good to go and run STARE on your own data.
+You will get a lot of print-outs and each Test will create a folder in -o. If you didn't get any ERROR messages, you should be good to go and run STARE on your own data.
 You can also choose individual tests by giving the respective number, if you don't want to run all of them. For example for Test_V7::
 
-    ./Code/runTestCases.sh 7
+    ./Code/runTestCases.sh -i <path to /Test/> -o <output path> -t 7
 
 ***************
 Input and options
 ***************
+
+A basic STARE run could look as follows (remember with bioconda you can call STARE.sh directly, without giving any path)::
+
+./Code/STARE.sh -b <bed_file> -a <gtf-gene_annotation> -g <fasta_file> -s <PSCM_file> -o <output_folder> 
 
 There are two ways to set the flags for STARE.
 
@@ -185,7 +196,7 @@ STARE expects a gzipped file of contact data for each chromosome. The contact fr
 
 We provide a small bash script that can produce those files from a .hic-file, using `Juicer's data extraction <https://github.com/aidenlab/juicer/wiki/Data-Extraction>`_. After installation of Juicer you can call the script via::
 
-   ./Juicebox_KR_normalization.sh -j <path_juicer_jar_file> -h <hic_path> -d <out_path> -c <chromosomes> -b <bin_size>
+   ./Code/Juicebox_KR_normalization.sh -j <path_juicer_jar_file> -h <hic_path> -d <out_path> -c <chromosomes> -b <bin_size>
 
 Specifying the chromosomes is optional, by default chr1-22 will be written. You can give a range or individual ones as comma-separated (e.g. 1-22 or 1,5,7,X). Be aware that we currently don't catch all combinations of chromosome options. Bin size defaults to 5kb. 
 

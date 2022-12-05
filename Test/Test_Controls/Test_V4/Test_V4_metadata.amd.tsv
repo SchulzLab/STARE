@@ -1,31 +1,31 @@
 [Description]
-process	STARE 1.0.1
+process	STARE 1.0.3
 run_by_user	dennis
-date	11_08_22
-time	08_58_24_N
-analysis_id	/Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Dev_Code/../Test//Test_V4/Test_V4
+date	11_29_22
+time	14_37_32_N
+analysis_id	../Test//Test_V4/Test_V4
 
 [Command]
-STARE.sh -g /Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Dev_Code/../Test//Test_Data/example_sequence_chr.fa -b /Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Dev_Code/../Test//Test_Data/example_regions.bed -o /Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Dev_Code/../Test//Test_V4 -p /Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Dev_Code/../PWMs/2.0/human_jaspar_hoc_kellis.PSEM -a /Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Dev_Code/../Test//Test_Data/example_annotation.gtf -w 3000
+STARE.sh -g ../Test//Test_Data/example_sequence_chr.fa -b ../Test//Test_Data/example_regions.bed -o ../Test//Test_V4 -p ../Test//Test_Data/Jaspar_Hocomoco_Kellis_human_PSEMs.txt -a ../Test//Test_Data/example_annotation.gtf -w 3000
 
 [Inputs]
-region_file	/Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Dev_Code/../Test//Test_Data/example_regions.bed
-signal_column	0
+-b region_file	../Test//Test_Data/example_regions.bed
+-n signal_column	0
 
 [References]
-genome_reference	/Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Dev_Code/../Test//Test_Data/example_sequence_chr.fa
-psems	/Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Dev_Code/../PWMs/2.0/human_jaspar_hoc_kellis.PSEM
-genome_annotation	/Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Dev_Code/../Test//Test_Data/example_annotation.gtf
+-g genome_reference	../Test//Test_Data/example_sequence_chr.fa
+-p psems	../Test//Test_Data/Jaspar_Hocomoco_Kellis_human_PSEMs.txt
+-a genome_annotation	../Test//Test_Data/example_annotation.gtf
 
 [Output path]
-/Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Dev_Code/../Test//Test_V4
+../Test//Test_V4
 
 [Parameters]
-cores	1
-window	3000
-tss_mode	all_tss
-decay	TRUE
+-c cores	1
+-w window	3000
+-i tss_mode	all_tss
+-e decay	TRUE
 
 [Metrics]
 Number of provided regions	7
-Number of considered psems	     726
+Number of considered psems	     818

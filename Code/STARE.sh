@@ -3,7 +3,7 @@ set -e  # To abort the whole script if one function returns an error.
 
 # See https://github.com/SchulzLab/STARE for more information and usage.
 # Adapted from TEPIC: https://github.com/SchulzLab/TEPIC
-version_num="1.0.3"
+version_num="1.0.3.1"
 help="STARE version ""$version_num""
 Usage: ./STARE.sh
 [-b/--bed_file bed file containing open chromatin regions]

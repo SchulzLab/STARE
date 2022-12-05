@@ -1,37 +1,37 @@
 [Description]
-process	STARE 1.0.1
+process	STARE 1.0.3
 run_by_user	dennis
-date	11_08_22
-time	08_58_27_N
-analysis_id	/Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Dev_Code/../Test//Test_V8/Test_V8
+date	11_29_22
+time	14_37_35_N
+analysis_id	../Test//Test_V8/Test_V8
 
 [Command]
-STARE.sh -g /Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Dev_Code/../Test//Test_Data/example_sequence_chr21part.fa -b /Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Dev_Code/../Test//Test_Data/ABC_example_regions.bed -o /Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Dev_Code/../Test//Test_V8 -p /Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Dev_Code/../PWMs/2.0/human_jaspar_hoc_kellis.PSEM -a /Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Dev_Code/../Test//Test_Data/ABC_example_annotation.gtf -w 500000 -n 4+ -f /Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Dev_Code/../Test//Test_Data/ABC_example_HiCFiles/ -k 5000 -t 0 -u /Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Dev_Code/../Test//Test_Data/example_genes.txt -i 5_tss
+STARE.sh -g ../Test//Test_Data/example_sequence_chr21part.fa -b ../Test//Test_Data/ABC_example_regions.bed -o ../Test//Test_V8 -p ../Test//Test_Data/Jaspar_Hocomoco_Kellis_human_PSEMs.txt -a ../Test//Test_Data/ABC_example_annotation.gtf -w 500000 -n 4+ -f ../Test//Test_Data/ABC_example_HiCFiles/ -k 5000 -t 0 -u ../Test//Test_Data/example_genes.txt -i 5_tss
 
 [Inputs]
-region_file	/Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Dev_Code/../Test//Test_Data/ABC_example_regions.bed
-signal_column	4+
-gene set	/Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Dev_Code/../Test//Test_Data/example_genes.txt
+-b region_file	../Test//Test_Data/ABC_example_regions.bed
+-n signal_column	4+
+-u gene set	../Test//Test_Data/example_genes.txt
 
 [References]
-genome_reference	/Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Dev_Code/../Test//Test_Data/example_sequence_chr21part.fa
-psems	/Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Dev_Code/../PWMs/2.0/human_jaspar_hoc_kellis.PSEM
-genome_annotation	/Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Dev_Code/../Test//Test_Data/ABC_example_annotation.gtf
+-g genome_reference	../Test//Test_Data/example_sequence_chr21part.fa
+-p psems	../Test//Test_Data/Jaspar_Hocomoco_Kellis_human_PSEMs.txt
+-a genome_annotation	../Test//Test_Data/ABC_example_annotation.gtf
 
 [Output path]
-/Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Dev_Code/../Test//Test_V8
+../Test//Test_V8
 
 [Parameters]
-cores	1
-window	500000
-tss_mode	5_tss
-path with hi-c contact files	/Users/dennis/Dev/STARE_GAZE/STARE_TEPIC/Dev_Code/../Test//Test_Data/ABC_example_HiCFiles/
-bin size of hi-c contacts	5000
-ABC-score cut-off	0
-Use pseudocount for contact frequency	TRUE
-Use adaptedABC version	TRUE
-Window size for the adaptedABC	5000000
+-c cores	1
+-w window	500000
+-i tss_mode	5_tss
+-f path with hi-c contact files	../Test//Test_Data/ABC_example_HiCFiles/
+-k bin size of hi-c contacts	5000
+-t ABC-score cut-off	0
+-d Use pseudocount for contact frequency	TRUE
+-q Use adaptedABC version	TRUE
+-m Window size for the adaptedABC	5000000
 
 [Metrics]
 Number of provided regions	7
-Number of considered psems	     726
+Number of considered psems	     818
