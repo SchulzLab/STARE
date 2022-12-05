@@ -1,7 +1,7 @@
 [![Documentation Status](https://readthedocs.org/projects/stare/badge/?version=latest)](https://stare.readthedocs.io/en/latest/?badge=latest)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.5841991.svg)](https://doi.org/10.5281/zenodo.5841991)
-[![Version](https://anaconda.org/bioconda/stare-abc/badges/version.svg)](https://anaconda.org/bioconda/stare-abc)
-[![Platforms](https://anaconda.org/bioconda/stare-abc/badges/platforms.svg)](https://anaconda.org/bioconda/stare-abc)
+[![install with bioconda](https://img.shields.io/badge/install%20with-bioconda-brightgreen.svg?style=flat)](http://bioconda.github.io/recipes/stare-abc/README.html)
+[![Platforms](https://anaconda.org/bioconda/stare-abc/badges/platforms.svg)](https://bioconda.github.io/recipes/stare-abc/README.html)
 
 
 # STARE - Look into TF regulation on gene level leveraging an adapted Activity-By-Contact score
