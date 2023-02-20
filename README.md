@@ -17,9 +17,9 @@ Those two parts are combined to summarise TF affinities on gene level, which all
 
 # References
 
-STARE and its application are described in our preprint on bioRxiv:
+STARE and its application are described in our publication:
 
-Hecker, Dennis, Fatemeh Behjati Ardakani, and Marcel H. Schulz. “The Adapted Activity-By-Contact Model for Enhancer-Gene Assignment and Its Application to Single-Cell Data” Preprint. BioRxiv, January 28, 2022. https://doi.org/10.1101/2022.01.28.478202.
+Hecker, D., Behjati Ardakani, F., Karollus, A., Gagneur, J., & Schulz, M. H. (2023). The adapted Activity-By-Contact model for enhancer–gene assignment and its application to single-cell data. Bioinformatics, 39(2), btad062. https://doi.org/10.1093/bioinformatics/btad062
 
 
 The results of our analyses are available via [Zenodo](https://doi.org/10.5281/zenodo.5841991).
