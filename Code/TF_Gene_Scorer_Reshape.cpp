@@ -649,8 +649,10 @@ int main(int argc, char **argv) {
     cout << "Summarize the region affinities on gene level." << endl;
 
     int batch_size = 1000;  // Collect data for a batch of genes and then write it to output in one go.
+    int gene_out_counter = 0;
     map < int, vector < vector < double>>> gene_batch;
     for (const int& gene : candidate_genes) {
+        gene_out_counter++;
         int gene_tss = stoi(tss_map[gene][1]);
         // Store affinities per out_iter.
         vector<vector<double>> these_gene_affinities(out_iters, vector<double>(num_tfs + 3));  // + Peak features.
@@ -729,7 +731,7 @@ int main(int argc, char **argv) {
         // WRITE TF-GENE AFFINITY OUTPUT
         // ____________________________________________________________
         // Write dense matrix output as strings when a batch is full or we reached the last gene.
-        if (not reshape and (gene_batch.size() == batch_size or gene_batch.size() == candidate_genes.size())) {
+        if (not reshape and (gene_batch.size() == batch_size or gene_out_counter == candidate_genes.size())) {
 #pragma omp parallel for num_threads(cores)
             for (int c = 0; c < out_iters; ++c) {
                 ofstream out_stream(out_files[c], ios_base::app);
