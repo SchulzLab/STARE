@@ -67,7 +67,6 @@ public:
 };
 
 
-
 int main(int argc, char **argv) {
     using namespace std;
     auto start0 = chrono::high_resolution_clock::now();
@@ -196,7 +195,7 @@ int main(int argc, char **argv) {
     // If contactfolder is False use the fractal function.
     string f_contactfolder_lower = f_contactfolder;
     transform(f_contactfolder_lower.begin(), f_contactfolder_lower.end(), f_contactfolder_lower.begin(),
-                                       [](unsigned char c){ return tolower(c); });
+              [](unsigned char c) { return tolower(c); });
     set<string> false_options = {"false", "0", "f"};
     if (f_contactfolder == " " or false_options.find(f_contactfolder_lower) != false_options.end()) {
         f_contactfolder = "";
@@ -220,11 +219,9 @@ int main(int argc, char **argv) {
     string tss_identifier;
     if (tss_type == "all_tss") {
         tss_identifier = "transcript";
-    }
-    else if (tss_type == "5_tss") {
+    } else if (tss_type == "5_tss") {
         tss_identifier = "gene";
-    }
-    else {
+    } else {
         cout << "ERROR unknown option for -i  " << tss_identifier << "\noptions are all_tss or 5_tss" << endl;
         return 1;
     }
@@ -305,7 +302,6 @@ int main(int argc, char **argv) {
                             }
                         }
                     } else {
-//                        gene_id_map[gene_counter] = gene_id;
                         id_ensg_map[gene_id] = gene_counter;
                         gene_information this_gene;
                         this_gene.gene_id = gene_id;
@@ -327,18 +323,20 @@ int main(int argc, char **argv) {
     // WRITE TEMPORARY GENE WINDOW FILE
     // ____________________________________________________________
     // First check if the peak file has a chr-prefix. This can happen if the executable is called independent of the
-    // TEPIC bash script which pre-processes the peak file.
-    // Also directly check for the signal columns in case n++ was given.
-    ifstream peek_peak(b_peakfile);
+    // STARE bash script which pre-processes the peak file. If a file with regions to exclude was given we
+    // base the prefixes on that.
+    string peek_file = b_peakfile;
+    if (!x_exclude_regions.empty()) {
+        peek_file = x_exclude_regions;
+    }
+    ifstream peek_peak(peek_file);
     if (!peek_peak) {
-        cout << "ERROR could not open the peak file\n" << b_peakfile << endl;
+        cout << "ERROR could not open the peak file\n" << peek_file << endl;
         return 1;
     }
     string line_peek;
     string peak_chr_prefix;
     bool has_chr_prefix = false;
-    vector<int> col_indices;  // Store the activity column indices.
-    int peak_file_rowlen = FilePeek(b_peakfile) * 4;
     while (!peek_peak.eof()) {
         getline(peek_peak, line_peek);
         if (line_peek.substr(0, 1) != "#") {
@@ -346,7 +344,24 @@ int main(int argc, char **argv) {
                 peak_chr_prefix = "chr";
                 has_chr_prefix = true;
             }
-            int total_cols = SplitTabLine(line_peek).size();
+            break;
+        }
+    }
+    peek_peak.close();
+
+    // Then check for the signal columns in case n++ was given.
+    ifstream peek_cols(b_peakfile);
+    if (!peek_cols) {
+        cout << "ERROR could not open the peak file\n" << b_peakfile << endl;
+        return 1;
+    }
+    string col_peek;
+    vector<int> col_indices;  // Store the activity column indices.
+    int peak_file_rowlen = FilePeek(b_peakfile) * 4;
+    while (!peek_cols.eof()) {
+        getline(peek_cols, col_peek);
+        if (col_peek.substr(0, 1) != "#") {
+            int total_cols = SplitTabLine(col_peek).size();
             if (activity_col.find('-') != string::npos) {
                 int hyphon_pos = activity_col.find('-', 0);
                 for (int i = stoi(activity_col.substr(0, hyphon_pos)) - 1;
@@ -371,7 +386,7 @@ int main(int argc, char **argv) {
             break;
         }
     }
-    peek_peak.close();
+    peek_cols.close();
     int col_num = col_indices.size();  // Total number of activity columns to iterate through.
     unordered_map<int, string> colname_map = FileHeaderMapping(b_peakfile, col_indices);
 
@@ -402,14 +417,15 @@ int main(int argc, char **argv) {
     }
     window_out.close();
 
+
     // ____________________________________________________________
     // READ ACTIVITIES AND WRITE BED-FILE WITH LOCATIONS ONLY
     // ____________________________________________________________
     // With many activity columns it's more efficient to do the intersection with the gene window based on a bed-file
     // without the activity columns. So we read the bed-file, store the activity columns and write a temporary
     // reduced bed-file with a peak_id as 4th column.
-    unordered_map <int, peak_information> peak_info_map;  // Storing an object for each peak, indexed by peakID.
-    unordered_map <int, string> peak_id_map;  // So we can identify peaks with an int instead of the full string.
+    unordered_map<int, peak_information> peak_info_map;  // Storing an object for each peak, indexed by peakID.
+    unordered_map<int, string> peak_id_map;  // So we can identify peaks with an int instead of the full string.
     peak_info_map.reserve(100000);
     string temp_bed_file = o_prefix + "_ABCpp_Temp_Regions.bed";
     ofstream bed_out(temp_bed_file);
@@ -419,16 +435,19 @@ int main(int argc, char **argv) {
     char peak_buffer[peak_file_rowlen];
     string bed_line;
     int peak_counter = 0;
+    int peak_chr_starter = 0;  // Index to start the substring on the chr-column from.
     while (!feof(Read_Peak_file)) {
         if (fgets(peak_buffer, peak_file_rowlen, Read_Peak_file) != nullptr) {
             bed_line = peak_buffer;
             if (bed_line.substr(0, 1) != "#") {
                 vector <string> columns = SplitTabLine(bed_line);
-                bed_out << columns[0] << "\t" << columns[1] << "\t" << columns[2] << "\t" << peak_counter << "\n";
-                string peak_id_string = columns[0] + ":" + columns[1] + "-" + columns[2];
-                if (has_chr_prefix) {  // Internally we remove the chr-prefix, for the intersection above we need it.
-                    peak_id_string = peak_id_string.substr(3);
+                if (peak_counter == 0) {
+                    if (columns[0].substr(0, 3) == "chr") {
+                        peak_chr_starter = 3;  // Remove a potential chr-prefix and add the one from the excluded file.
+                    }
                 }
+                bed_out << peak_chr_prefix+columns[0].substr(peak_chr_starter) << "\t" << columns[1] << "\t" << columns[2] << "\t" << peak_counter << "\n";
+                string peak_id_string = columns[0].substr(peak_chr_starter) + ":" + columns[1] + "-" + columns[2];
                 peak_information this_peak;
                 this_peak.start = stoi(columns[1]);
                 this_peak.end = stoi(columns[2]);
@@ -447,7 +466,7 @@ int main(int argc, char **argv) {
     // FIND EXCLUDED REGIONS
     // ____________________________________________________________
     // Find the peaks that overlap with an excluded region to later not add them to the peaks per gene.
-    unordered_set <int> excluded_peaks;  // Collect the matching peak_ids.
+    unordered_set<int> excluded_peaks;  // Collect the matching peak_ids.
     if (!x_exclude_regions.empty()) {
         string exclude_regions_intersect =
                 "bedtools intersect -a " + temp_bed_file + " -b " + x_exclude_regions + " -u 2>&1";
@@ -472,13 +491,37 @@ int main(int argc, char **argv) {
                     if (line.substr(0, 13) == "***** WARNING") {
                         cout << line << "\n" << "excluding regions not possible" << endl;
                     }
-                    excluded_peaks.insert(stoi(line.substr(pos+1, line.size()-pos-2)));  // \tpeak_id\n
+                    excluded_peaks.insert(stoi(line.substr(pos + 1, line.size() - pos - 2)));  // \tpeak_id\n
                 }
             }
             pclose(exclude_stream);
         } else {
             cout << "WARNING Excluding regions not possible" << endl;
         }
+    }
+
+    // ____________________________________________________________
+    // READ GENES TO FILTER FOR
+    // ____________________________________________________________
+    unordered_set <string> filter_genes;
+    unordered_set <string> gene_chromosomes;  // We might be able to skip chromosomes if -u allows.
+    if (u_genefile.length() != 0 and u_genefile != "0") {
+        ifstream read_genefile(u_genefile);
+        if (!read_genefile) {
+            cout << "ERROR could not open gene file\n" << u_genefile << endl;
+            return 1;
+        }
+        string u_row;
+        while (!read_genefile.eof()) {
+            getline(read_genefile, u_row);
+            filter_genes.insert(u_row);
+            for (const auto& this_gene : promoter_map) {  // Look for a matching ID or gene name.
+                if (this_gene.second.gene_id == u_row or this_gene.second.name == u_row) {
+                    gene_chromosomes.insert(this_gene.second.chr);
+                }
+            }
+        }
+        read_genefile.close();
     }
 
     // ____________________________________________________________
@@ -489,7 +532,7 @@ int main(int argc, char **argv) {
     // Process the whole bed_output, by mapping the peak_ids to the respective genes and also map the location and
     // activity of the peaks in a separate map, and gather the genes for each chromosome.
     unordered_set <string> peak_chromosomes; // Store on which chromosomes we have an intersection.
-    unordered_map <int, set<int>> gene_peak_map; // Storing the ids of peaks in the window.
+    unordered_map<int, set<int>> gene_peak_map; // Storing the ids of peaks in the window.
     gene_peak_map.reserve(promoter_map.size());
 
     // Using popen to iterate over the rows and fill both maps for genes and peaks.
@@ -508,10 +551,17 @@ int main(int argc, char **argv) {
                     continue;
                 }
                 string this_chr = columns[0];
-                if (has_chr_prefix) {  // Already checked that when we peeked at the first line in the peak file.
+                if (has_chr_prefix) {  // Already checked that in the peak file or the exclude file.
                     this_chr = this_chr.substr(3);
                 }
-                peak_chromosomes.insert(this_chr);
+                if (u_genefile.length() != 0 and u_genefile != "0") {
+                    if (gene_chromosomes.count(this_chr) == 1) {
+                        peak_chromosomes.insert(this_chr);
+                    }
+                }
+                else {
+                    peak_chromosomes.insert(this_chr);
+                }
                 int intersect_gene = stoi(columns[3]);  // Fetch the gene_id.
                 int peak_id = stoi(columns[7]);
                 gene_peak_map[intersect_gene].insert(peak_id);
@@ -527,7 +577,7 @@ int main(int argc, char **argv) {
     GetStdoutFromCommand("rm " + temp_bed_file);
 
     vector <string> chromosomes;  // New datastructure for better sorting and iteration.
-    for (const string& chr : peak_chromosomes) {
+    for (const string &chr : peak_chromosomes) {
         chromosomes.push_back(chr);
     }
     // Sort chromosomes to have the large ones first, potentially speeds up the parallel part.
@@ -563,29 +613,12 @@ int main(int argc, char **argv) {
         gene_info_out.close();
     }
 
-    // ____________________________________________________________
-    // READ GENES TO FILTER FOR
-    // ____________________________________________________________
-    unordered_set<string> filter_genes;
-    if (u_genefile.length() != 0 and u_genefile != "0") {
-        ifstream read_genefile(u_genefile);
-        if (!read_genefile) {
-            cout << "ERROR could not open gene file\n" << u_genefile << endl;
-            return 1;
-        }
-        string u_row;
-        while (!read_genefile.eof()) {
-            getline(read_genefile, u_row);
-            filter_genes.insert(u_row);
-        }
-        read_genefile.close();
-    }
 
     // ____________________________________________________________
     // ITERATE THROUGH THE CHROMOSOMES
     // ____________________________________________________________
     // First see which contact files are available.
-    vector<string> contact_files;
+    vector <string> contact_files;
     if (!f_contactfolder.empty()) {
         string ls_out = GetStdoutFromCommand("ls " + f_contactfolder + "/");
         istringstream read_ls_out(ls_out);
@@ -601,19 +634,26 @@ int main(int argc, char **argv) {
     }
 
     // Prepare a structure to store genes that are discarded during processing.
-    unordered_set <int> genes_wo_hic;  // Missing normalized contact file
-    unordered_set <int> genes_wo_candidates;  // No candidate regions in gene window (ABC)
-    unordered_set <int> written_genes;  // To track the genes we already wrote to the GeneInfo.
-    written_genes.reserve(promoter_map.size());
+    unordered_set<int> genes_wo_hic;  // Missing normalized contact file
+    unordered_set<int> genes_wo_candidates;  // No candidate regions in gene window (ABC)
+    map <int, unordered_set<int>> written_genes;  // To track the genes we already wrote to GeneInfo for each column.
     vector <omp_lock_t> file_locks;
     for (int i = 0; i < col_num; i++) {
         omp_lock_t new_lock;
         omp_init_lock(&new_lock);
         file_locks.push_back(new_lock);
     }
+    // If we have many activity columns the memory becomes pretty heavy and we parallelize over batches instead of chr.
+    int chr_cores = cores;
+    int batch_cores = 1;
+    if (col_num > 200) {
+        chr_cores = 1;
+        batch_cores = cores;
+    }
+
     // Iterate over the chromosomes, read the normalized matrix in, and iterate over the genes on the chr to calculate
     // the ABC-score.
-#pragma omp parallel for num_threads(cores)
+#pragma omp parallel for num_threads(chr_cores)
     for (unsigned int chr_idx = 0; chr_idx < chromosomes.size(); chr_idx++) {  // Can't be range-based due to openmp.
         string chr = chromosomes[chr_idx];
         if (chr_gene_map[chr].empty()) {  // In case we don't have any genes on that chromosome.
@@ -656,8 +696,11 @@ int main(int argc, char **argv) {
             }
             regex int_match("[0-9]");
             if (temp_row == "foo" or chr_file.empty() or !regex_match(temp_row.substr(0, 1), int_match)) {
-                for (const int &gene : chr_gene_map[chr]) {
-                    genes_wo_hic.insert(gene);
+#pragma omp critical(protect_wohic)  // In the unlikely case two chr threads encounter an empty contact file.
+                {
+                    for (const int &gene : chr_gene_map[chr]) {
+                        genes_wo_hic.insert(gene);
+                    }
                 }
                 cout << chr << " no contact matrix" << endl;
                 continue;
@@ -672,7 +715,7 @@ int main(int argc, char **argv) {
             min_bin = hic_boundaries[chr][0] / bin_size;
             max_bin = hic_boundaries[chr][1] / bin_size;
             // For the pseudocount we are not restricted to the hic_boundaries set by the genes.
-            int min_pseudo_bin = numeric_limits<int>::max();
+            int min_pseudo_bin = numeric_limits<int>::max();  // Compare to the largest possible to find the smallest.
             int max_pseudo_bin = 0;
             // +1 To include max_bin.
             contact_matrix.resize(max_bin + 1 - min_bin, max_bin + 1 - min_bin, false);
@@ -726,7 +769,6 @@ int main(int argc, char **argv) {
                 pclose(hic_stream);
             }
 
-
             // Fit a linear function to the mean contact at each distance within 1MB.
             double sumX = 0, sumX2 = 0, sumY = 0, sumXY = 0, regression_count = 0;
             for (int c = 0; c < contact_sums.size(); c++) {
@@ -773,30 +815,32 @@ int main(int argc, char **argv) {
             auto duration_hic = chrono::duration_cast<chrono::milliseconds>(stop_hic - start_hic);
             cout << duration_hic.count() << "ms; " << chr << " contact matrix read" << endl;
         }
+
         // ____________________________________________________________
         // GET PEAK-GENE CONTACTS AND SUM THE CONTACT PER ENHANCER
         // ____________________________________________________________
         // Initialize an empty 2D vector to gather the interactions > threshold for each chromosomes.
         // Contact|scaledContact| + activity_cols x (signalValue|scaledActivity|ABC-Score)
-        map<int, vector<abc_hit>> exceeders;  // Map with activity_cols, gathering all hits > threshold.
-        double chr_max = 0;
         auto start_scores = chrono::high_resolution_clock::now();
+        double chr_max = 0;
         // Store contacts in same order as gene_peak_map.
-        unordered_map<int, map<int, vector<double>>> gene_contact_map; //  {gene: {tss: [contacts]}}
-        gene_contact_map.reserve(chr_gene_map[chr].size());
         for (const int &chr_gene : chr_gene_map[chr]) {
             if (gene_peak_map.count(chr_gene) == 1) {
                 for (int gene_tss : promoter_map[chr_gene].tss) {
                     int gene_bin = gene_tss / bin_size;
-                    vector<double> these_contacts;
                     // We collected all peaks that are in the window of any of the TSS of a gene.
                     for (auto peak = gene_peak_map[chr_gene].begin(); peak != gene_peak_map[chr_gene].end();) {
                         peak_information &matching_peak = peak_info_map[*peak];
                         double this_contact;
                         int peak_bin = ((matching_peak.end + matching_peak.start) / 2) / bin_size;
-                        int distance_to_min = GetDistance(matching_peak.start, matching_peak.end, *min_element(promoter_map[chr_gene].tss.begin(), promoter_map[chr_gene].tss.end()));
-                        int distance_to_max = GetDistance(matching_peak.start, matching_peak.end, *max_element(promoter_map[chr_gene].tss.begin(), promoter_map[chr_gene].tss.end()));
-                        int distance = min(distance_to_min, distance_to_max);  // Closest TSS to that peak.
+                        int distance = GetDistance(matching_peak.start, matching_peak.end, gene_tss);
+                        int distance_to_min = GetDistance(matching_peak.start, matching_peak.end,
+                                                          *min_element(promoter_map[chr_gene].tss.begin(),
+                                                                       promoter_map[chr_gene].tss.end()));
+                        int distance_to_max = GetDistance(matching_peak.start, matching_peak.end,
+                                                          *max_element(promoter_map[chr_gene].tss.begin(),
+                                                                       promoter_map[chr_gene].tss.end()));
+                        int closest_distance = min(distance_to_min, distance_to_max);  // Closest TSS to that peak.
 
                         if (f_contactfolder.empty()) {
                             // Fractal module, approximate contact, but only for >5kb.
@@ -814,17 +858,15 @@ int main(int argc, char **argv) {
                             }
                         }
                         matching_peak.contact_sum += this_contact;
-                        if (distance <= gene_windowsize) {
+                        if (closest_distance <= gene_windowsize) {
                             if (this_contact > chr_max) {
                                 chr_max = this_contact;
                             }
-                            these_contacts.push_back(this_contact);
                             ++peak;
                         } else {  // Remove peaks that are only in the enh-window, only needed them for the contact_sum.
                             peak = gene_peak_map[chr_gene].erase(peak);
                         }
                     }
-                    gene_contact_map[chr_gene][gene_tss] = these_contacts;
                 }
             }
         }
@@ -834,193 +876,257 @@ int main(int argc, char **argv) {
         // ____________________________________________________________
         // Now that we mapped the peaks to the genes and fetched the respective information on the peaks, we can do
         // the gene-wise scoring.
-        unordered_map<int, double> gene_contact_scaler; // No need to store it for each interaction of a gene.
-        gene_contact_scaler.reserve(chr_gene_map[chr].size());
+        auto start_batched = chrono::high_resolution_clock::now();
+        int batch_size = max(1, int((60000 * (2 - pow(10, -5 * abc_cutoff)) / col_num)));
+        // Chunk the genes on that chromosome and sort their IDs into batches to allow parallelization.
+        int num_batches = ceil(chr_gene_map[chr].size() / batch_size);
+        int batch_helper = 0;
+        int batch_counter = 0;
+        map<int, unordered_set<int>> batch_genes;
         for (const int &chr_gene : chr_gene_map[chr]) {
-            gene_information &curr_gene = promoter_map[chr_gene];
-            // Check if we can skip that gene, if it's not in the u_genefile with its ID or symbol.
-            if (u_genefile.length() != 0 and u_genefile != "0") {
-                if ((filter_genes.count(curr_gene.gene_id) == 0) and (filter_genes.count(curr_gene.name) == 0)) {
-                    continue;
-                }
+            ++batch_helper;
+            batch_genes[batch_counter].insert(chr_gene);
+            if (batch_helper % batch_size == 0 or batch_helper == chr_gene_map[chr].size()) {
+                batch_counter++;
             }
-            auto gene_iter = gene_peak_map.find(chr_gene);
-            if (gene_iter == gene_peak_map.end()) {  // Can also happen if all were overlapping with excluded regions.
-                genes_wo_candidates.insert(chr_gene);
-                continue;
-            }
-            int num_candidates = gene_iter->second.size();
-            if (num_candidates == 0) {  // If all regions were only in the enhancer window, we still have an empty set.
-                genes_wo_candidates.insert(chr_gene);
-                continue;
-            }
-            // activity_cols x (scaled/adjustedActivity | Activity*Contact)
-            vector<vector<double>> candidate_activities(num_candidates, vector<double>(2 * (col_num)));
-            vector<double> candidate_contacts(num_candidates);
-            vector<int> candidate_ids(num_candidates);  // Stores the peak_id.
-            vector<double> max_signals(col_num);
-            vector<double> abc_sums(col_num);
-            double max_contact = 0;
-            int peak_count_helper = 0;
-
-            for (const int &peak_id : gene_iter->second) {
-                peak_information &matching_peak = peak_info_map[peak_id];
-                for (int tss : curr_gene.tss) {  // Sum up all information across TSS to later get the average.
-                    // Should always have an entry if there were still num_candidates.
-                    double current_contact = gene_contact_map[chr_gene][tss][peak_count_helper];
-                    candidate_contacts[peak_count_helper] += current_contact;  // Sum over all TSS, A*C is further down.
-
-                    for (int a_col = 0; a_col < col_num; a_col++) {
-                        double current_activity = matching_peak.signal[a_col];
-                        if (current_activity == 0) {
-                            continue;
-                        }
-                        if (do_adjusted_abc) {
-                            current_activity = current_activity * (current_contact / matching_peak.contact_sum);
-                        }
-                        candidate_activities[peak_count_helper][a_col * 2] += current_activity;
-                        candidate_activities[peak_count_helper][a_col * 2 + 1] += current_activity * current_contact;
-                        abc_sums[a_col] += current_activity * current_contact;
-                    }
-                    // Add the interaction so we can later trace back which peak and gene it was.
-                    candidate_ids[peak_count_helper] = peak_id;
-                }
-                if (candidate_contacts[peak_count_helper] > max_contact) {
-                    max_contact = candidate_contacts[peak_count_helper];
-                }
-                if (not do_adjusted_abc) {  // Only need to search for the maximum if we don't adjust the activity.
-                    for (int a_col = 0; a_col < col_num; a_col++) {
-                        if (candidate_activities[peak_count_helper][a_col * 2] > max_signals[a_col]) {
-                            max_signals[a_col] =
-                                    candidate_activities[peak_count_helper][a_col * 2] / curr_gene.tss.size();
-                        }
+        }
+#pragma omp parallel for num_threads(batch_cores)  // Only parallel if number of activity columns >100.
+        for (unsigned int batch = 0; batch <= num_batches; batch++) {
+            map<int, vector<abc_hit>> exceeders;  // Map with activity_cols, gathering all hits > threshold.
+            unordered_map<int, double> gene_contact_scaler; // No need to store it for each interaction of a gene.
+            gene_contact_scaler.reserve(min(static_cast<size_t>(batch_size), batch_genes[batch].size()));
+            for (const int &chr_gene : batch_genes[batch]) {
+                bool valid_gene = true;
+                gene_information &curr_gene = promoter_map[chr_gene];
+                // Check if we can skip that gene, if it's not in the u_genefile with its ID or symbol.
+                if (u_genefile.length() != 0 and u_genefile != "0") {
+                    if ((filter_genes.count(curr_gene.gene_id) == 0) and
+                        (filter_genes.count(curr_gene.name) == 0)) {
+                        valid_gene = false;  // We can't continue, or we wouldn't reach the if() for output writing.
                     }
                 }
-                peak_count_helper++;
-            }
-            // Rescaling the contact to a maximum of 100 only has to be done once. For the activity as many times as
-            // there are activity columns. If none of the peaks has contact with the gene, the contact_rescaler and
-            // thus the scores will be set to 0.
-            gene_contact_scaler[chr_gene] = (max_contact != 0) ? 100 / (max_contact / curr_gene.tss.size()) : 0;
-            // Write the relative ABC-score. And activity if not adjusting it.
-            for (int r = 0; r < peak_count_helper; ++r) {
-                double this_contact = candidate_contacts[r] / curr_gene.tss.size();  // Avg across TSS.
-                for (int a_col = 0; a_col < col_num; a_col++) {
-                    if (candidate_activities[r][a_col * 2] > 0) {  // W/o activity it will be 0 anyway.
-                        double this_sum = abc_sums[a_col];
-                        if (this_sum != 0) {
-                            double this_score = candidate_activities[r][a_col * 2 + 1] / this_sum;
-                            if (this_score >= abc_cutoff) {
-                                abc_hit this_hit;
-                                this_hit.gene_id = chr_gene;
-                                // Before we stored this sequentially, not by peak-id, we save the lookup later.
-                                this_hit.peak_id = candidate_ids[r];
-                                if (not do_adjusted_abc) {
-                                    this_hit.scaledActivity = (candidate_activities[r][a_col * 2] /
-                                                               curr_gene.tss.size()) * (100 / max_signals[a_col]);
+                auto gene_iter = gene_peak_map.find(chr_gene);
+                if (gene_iter ==
+                    gene_peak_map.end()) {  // Can also happen if all were overlapping with excluded regions.
+#pragma omp critical(protect_wocan)
+                    {
+                        genes_wo_candidates.insert(chr_gene);
+                    }
+                    valid_gene = false;
+                }
+                int num_candidates = 0;
+                if (valid_gene) {  // Ugly construct, but if the earlier check already failed, this one fails.
+                    num_candidates = gene_iter->second.size();
+                    // If all regions were only in the enhancer window, we still have an empty set.
+                    if (num_candidates == 0) {
+#pragma omp critical(protect_wocan2)
+                        {
+                            genes_wo_candidates.insert(chr_gene);
+                        }
+                        valid_gene = false;
+                    }
+                }
+                // Workaround to continue for invalid genes, so if the last gene is invalid the previous are written.
+                if (valid_gene) {
+                    // activity_cols x (scaled/adjustedActivity | Activity*Contact)
+                    vector <vector<double>> candidate_activities(num_candidates, vector<double>(2 * (col_num)));
+                    vector<double> candidate_contacts(
+                            num_candidates);  // To later be able to give the average across TSS.
+                    vector<int> candidate_ids(num_candidates);  // Stores the peak_id.
+                    vector<double> max_signals(col_num);
+                    vector<double> abc_sums(col_num);
+                    double max_contact = 0;
+                    int peak_count_helper = 0;
+
+                    for (const int &peak_id : gene_iter->second) {
+                        peak_information &matching_peak = peak_info_map[peak_id];
+                        int peak_bin = ((matching_peak.end + matching_peak.start) / 2) / bin_size;
+                        for (int tss : curr_gene.tss) {  // Sum up all information across TSS to later get the average.
+                            // Should always have an entry if there were still num_candidates.
+                            int gene_bin = tss / bin_size;
+                            double current_contact;
+                            int distance = GetDistance(matching_peak.start, matching_peak.end, tss);
+
+                            if (f_contactfolder.empty()) {
+                                // Fractal module, approximate contact, but only for >5kb.
+                                current_contact = pow(max(distance, 5000), -1);
+                            } else {
+                                double pseudocount = close_pseudocount;
+                                if (abs(gene_bin - peak_bin) * bin_size > 1000000) {
+                                    pseudocount = exp(slope * log(abs(gene_bin - peak_bin) * bin_size) + intercept);
+                                }
+                                if ((peak_bin > max_bin) or (peak_bin < min_bin)) {
+                                    current_contact = pseudocount;
                                 } else {
-                                    this_hit.scaledActivity = candidate_activities[r][a_col * 2] / curr_gene.tss.size();
+                                    current_contact = pseudocount + contact_matrix(min(gene_bin, peak_bin) - min_bin,
+                                                                                   max(gene_bin, peak_bin) - min_bin);
                                 }
-                                this_hit.contact = this_contact;
-                                double distance = 0;
-                                for (int tss : curr_gene.tss) {
-                                    distance += GetDistance(peak_info_map[this_hit.peak_id].start, peak_info_map[this_hit.peak_id].end, tss);
+                            }
+                            candidate_contacts[peak_count_helper] += current_contact;  // Sum over all TSS, A*C is further down.
+
+                            for (int a_col = 0; a_col < col_num; a_col++) {
+                                double current_activity = matching_peak.signal[a_col];
+                                if (current_activity == 0) {
+                                    continue;
                                 }
-                                this_hit.distance = distance / curr_gene.tss.size();
-                                this_hit.score = this_score;
-                                exceeders[a_col].push_back(this_hit);
+                                if (do_adjusted_abc) {
+                                    current_activity = current_activity * (current_contact / matching_peak.contact_sum);
+                                }
+                                candidate_activities[peak_count_helper][a_col * 2] += current_activity;
+                                candidate_activities[peak_count_helper][a_col * 2 + 1] +=
+                                        current_activity * current_contact;
+                                abc_sums[a_col] += current_activity * current_contact;
+                            }
+                            // Add the interaction so we can later trace back which peak and gene it was.
+                            candidate_ids[peak_count_helper] = peak_id;
+                        }
+                        if (candidate_contacts[peak_count_helper] > max_contact) {
+                            max_contact = candidate_contacts[peak_count_helper];
+                        }
+                        if (not do_adjusted_abc) {  // Only need to search for the maximum if we don't adjust the activity.
+                            for (int a_col = 0; a_col < col_num; a_col++) {
+                                if (candidate_activities[peak_count_helper][a_col * 2] > max_signals[a_col]) {
+                                    max_signals[a_col] =
+                                            candidate_activities[peak_count_helper][a_col * 2] / curr_gene.tss.size();
+                                }
+                            }
+                        }
+                        peak_count_helper++;
+                    }
+                    // Rescaling the contact to a maximum of 100 only has to be done once. For the activity as many times as
+                    // there are activity columns. If none of the peaks has contact with the gene, the contact_rescaler and
+                    // thus the scores will be set to 0.
+                    gene_contact_scaler[chr_gene] = (max_contact != 0) ? 100 / (max_contact / curr_gene.tss.size()) : 0;
+                    // Write the relative ABC-score. And activity if not adjusting it.
+                    for (int r = 0; r < peak_count_helper; ++r) {
+                        double this_contact = candidate_contacts[r] / curr_gene.tss.size();  // Avg across TSS.
+                        for (int a_col = 0; a_col < col_num; a_col++) {
+                            if (candidate_activities[r][a_col * 2] > 0) {  // W/o activity it will be 0 anyway.
+                                double this_sum = abc_sums[a_col];
+                                if (this_sum != 0) {
+                                    double this_score = candidate_activities[r][a_col * 2 + 1] / this_sum;
+                                    if (this_score >= abc_cutoff) {
+                                        abc_hit this_hit;
+                                        this_hit.gene_id = chr_gene;
+                                        // Before we stored this sequentially, not by peak-id, we save the lookup later.
+                                        this_hit.peak_id = candidate_ids[r];
+                                        if (not do_adjusted_abc) {
+                                            this_hit.scaledActivity = (candidate_activities[r][a_col * 2] /
+                                                                       curr_gene.tss.size()) *
+                                                                      (100 / max_signals[a_col]);
+                                        } else {
+                                            this_hit.scaledActivity =
+                                                    candidate_activities[r][a_col * 2] / curr_gene.tss.size();
+                                        }
+                                        this_hit.contact = this_contact;
+                                        double distance = 0;
+                                        for (int tss : curr_gene.tss) {
+                                            distance += GetDistance(peak_info_map[this_hit.peak_id].start,
+                                                                    peak_info_map[this_hit.peak_id].end, tss);
+                                        }
+                                        this_hit.distance = distance / curr_gene.tss.size();
+                                        this_hit.score = this_score;
+                                        exceeders[a_col].push_back(this_hit);
+                                    }
+                                }
                             }
                         }
                     }
+                }
+            }
+
+            // Shuffle the order in which the files are written to not block the locks by one chromosome.
+            vector<int> a_col_shuffle;
+            a_col_shuffle.reserve(col_num);
+            for (int i = 0; i < col_num; i++) {
+                a_col_shuffle.push_back(i);
+            }
+            random_device rd;
+            mt19937 g(rd());
+            shuffle(begin(a_col_shuffle), end(a_col_shuffle), g);
+
+            for (int a_idx = 0; a_idx < col_num; a_idx++) {
+                int a_col = a_col_shuffle[a_idx];
+                if (!exceeders[a_col].empty()) {
+                    omp_set_lock(&file_locks[a_col]);  // Only one thread can write into the same file at a time.
+                    // Repeat the process for each activity column.
+                    ofstream out_stream(out_files[a_col], ios_base::app);
+                    ofstream gene_info_stream(gene_info_files[a_col], ios_base::app);
+                    gene_information gene_map = promoter_map[exceeders[a_col][0].gene_id];  // Get first entry, update for new genes.
+                    vector<double> gene_info(4, 0);
+                    int hit_helper = 0;
+                    for (auto hit : exceeders[a_col]) {
+                        auto matching_peak = peak_info_map[hit.peak_id];
+                        out_stream << gene_map.chr << "\t" << matching_peak.start << "\t" << matching_peak.end;
+                        out_stream << "\t" << gene_map.gene_id << "\t" << gene_map.name;
+                        out_stream << "\t" << peak_id_map[hit.peak_id];  // Get back the string version of the id.
+                        out_stream << "\t" << setprecision(8)
+                                   << peak_info_map[hit.peak_id].signal[a_col];  // signalValue
+                        out_stream << "\t" << setprecision(8) << hit.contact;  // Contact
+                        out_stream << "\t" << setprecision(8) << hit.scaledActivity;  // scaledActivity
+                        out_stream << "\t" << setprecision(8)
+                                   << hit.contact * gene_contact_scaler[hit.gene_id];  // scaledContact
+                        // adjustedActivity OR chr-scaled Contact * signalValue
+                        if (do_adjusted_abc) {
+                            out_stream << "\t" << setprecision(8) << hit.scaledActivity;
+                        } else {
+                            out_stream << "\t" << setprecision(8) << hit.contact /
+                                                                     chr_max *
+                                                                     peak_info_map[hit.peak_id].signal[a_col];
+                        }
+                        out_stream << "\t" << setprecision(8) << hit.distance;  // Distance
+                        out_stream << "\t" << setprecision(8) << hit.score << "\n";  // ABC-Score
+                        // Sum up the attributes of the interaction.
+                        gene_info[0] += 1;
+                        gene_info[1] += peak_info_map[hit.peak_id].signal[a_col];
+                        gene_info[2] += hit.contact;
+                        gene_info[3] += hit.distance;
+
+                        // For the gene info keep track of the current gene, we filled the data ordered by genes.
+                        if (hit_helper == exceeders[a_col].size() - 1 or
+                            exceeders[a_col][hit_helper + 1].gene_id != hit.gene_id) {
+#pragma omp critical(protect_set)
+                            {
+                            written_genes[a_col].insert(hit.gene_id);
+                            }
+                            gene_info_stream << gene_map.gene_id << "\t" << gene_map.name << "\t" << gene_map.chr
+                                             << "\t";
+                            int comma_helper = 0;  // To make it csv without a trailing ",".
+                            for (int tss : gene_map.tss) {
+                                if (comma_helper > 0) {
+                                    gene_info_stream << ",";
+                                }
+                                gene_info_stream << to_string(tss);
+                                comma_helper++;
+                            }
+                            int num_enhancer = static_cast<int>(gene_info[0]);
+                            if (num_enhancer > 0) {
+                                gene_info_stream << "\t" << num_enhancer << "\t" << gene_info[1] / num_enhancer <<
+                                                 "\t" << gene_info[2] / num_enhancer << "\t"
+                                                 << gene_info[3] / num_enhancer << "\t-\n";
+                            } else {
+                                gene_info_stream << "\t0\t0\t0\t0\tScore of candidates too low\n";
+                            }
+                            fill(gene_info.begin(), gene_info.end(), 0);  // Reset the vector.
+                            if (hit_helper <
+                                exceeders[a_col].size() - 1) {  // Reduces the look up for each interaction.
+                                gene_map = promoter_map[exceeders[a_col][hit_helper + 1].gene_id];
+                            }
+                        }
+                        hit_helper++;
+                    }
+                    out_stream.close();
+                    gene_info_stream.close();
+                    omp_unset_lock(&file_locks[a_col]);  // After writing, open the lock again.
                 }
             }
         }
 
         auto stop_scores = chrono::high_resolution_clock::now();
         auto duration_scores = chrono::duration_cast<chrono::milliseconds>(stop_scores - start_scores);
-        cout << duration_scores.count() << "ms; " << chr << " Scores processed" << endl;
-
-        auto start_out = chrono::high_resolution_clock::now();
-        // Shuffle the order in which the files are written to not block the locks by one chromosome.
-        vector<int> a_col_shuffle;
-        a_col_shuffle.reserve(col_num);
-        for (int i = 0; i < col_num; i++) {
-            a_col_shuffle.push_back(i);
-        }
-        random_device rd;
-        mt19937 g(rd());
-        shuffle(begin(a_col_shuffle), end(a_col_shuffle), g);
-
-        for (int a_idx = 0; a_idx < col_num; a_idx++) {
-            int a_col = a_col_shuffle[a_idx];
-            if (!exceeders[a_col].empty()) {
-                omp_set_lock(&file_locks[a_col]);  // Only one chromosome can write into the same file at a time.
-                // Repeat the process for each activity column.
-                ofstream out_stream(out_files[a_col], ios_base::app);
-                ofstream gene_info_stream(gene_info_files[a_col], ios_base::app);
-                gene_information gene_map = promoter_map[exceeders[a_col][0].gene_id];  // Get first entry, update for new genes.
-                vector<double> gene_info(4, 0);
-                int hit_helper = 0;
-                for (auto hit : exceeders[a_col]) {
-                    auto matching_peak = peak_info_map[hit.peak_id];
-                    out_stream << gene_map.chr << "\t" << matching_peak.start << "\t" << matching_peak.end;
-                    out_stream << "\t" << gene_map.gene_id << "\t" << gene_map.name;
-                    out_stream << "\t" << peak_id_map[hit.peak_id];  // Get back the string version of the id.
-                    out_stream << "\t" << setprecision(8) << peak_info_map[hit.peak_id].signal[a_col];  // signalValue
-                    out_stream << "\t" << setprecision(8) << hit.contact;  // Contact
-                    out_stream << "\t" << setprecision(8) << hit.scaledActivity;  // scaledActivity
-                    out_stream << "\t" << setprecision(8) << hit.contact * gene_contact_scaler[hit.gene_id];  // scaledContact
-                    // adjustedActivity OR chr-scaled Contact * signalValue
-                    if (do_adjusted_abc) {
-                      out_stream << "\t" << setprecision(8) << hit.scaledActivity;
-                    } else {
-                      out_stream << "\t" << setprecision(8) << hit.contact /
-                      chr_max * peak_info_map[hit.peak_id].signal[a_col];
-                    }
-                    out_stream << "\t" << setprecision(8) << hit.distance;  // Distance
-                    out_stream << "\t" << setprecision(8) << hit.score << "\n";  // ABC-Score
-                    // Sum up the attributes of the interaction.
-                    gene_info[0] += 1;
-                    gene_info[1] += peak_info_map[hit.peak_id].signal[a_col];
-                    gene_info[2] += hit.contact;
-                    gene_info[3] += hit.distance;
-
-                    // For the gene info keep track of the current gene, we filled the data ordered by genes.
-                    if (hit_helper == exceeders[a_col].size() - 1 or exceeders[a_col][hit_helper+1].gene_id != hit.gene_id) {
-                        written_genes.insert(hit.gene_id);
-                        gene_info_stream << gene_map.gene_id << "\t" << gene_map.name << "\t" << gene_map.chr << "\t";
-                        int comma_helper = 0;  // To make it csv without a trailing ",".
-                        for (int tss : gene_map.tss) {
-                            if (comma_helper > 0) {
-                                gene_info_stream << ",";
-                            }
-                            gene_info_stream << to_string(tss);
-                            comma_helper++;
-                        }
-                        int num_enhancer = static_cast<int>(gene_info[0]);
-                        if (num_enhancer > 0) {
-                            gene_info_stream << "\t" << num_enhancer << "\t" << gene_info[1] / num_enhancer <<
-                                             "\t" << gene_info[2] / num_enhancer << "\t"
-                                             << gene_info[3] / num_enhancer << "\t-\n";
-                        } else {
-                            gene_info_stream << "\t0\t0\t0\t0\tScore of candidates too low\n";
-                        }
-                        fill(gene_info.begin(), gene_info.end(), 0);  // Reset the vector.
-                        if (hit_helper < exceeders[a_col].size() - 1) {  // Reduces the look up for each interaction.
-                            gene_map = promoter_map[exceeders[a_col][hit_helper+1].gene_id];
-                        }
-                    }
-                    hit_helper++;
-                }
-                out_stream.close();
-                gene_info_stream.close();
-                omp_unset_lock(&file_locks[a_col]);  // After writing, open the lock again.
-            }
-        }
-        auto stop_out = chrono::high_resolution_clock::now();
-        auto duration_out = chrono::duration_cast<chrono::milliseconds>(stop_out - start_out);
-        cout << duration_out.count() << "ms; " << chr << " written to output" << endl;
+        cout << duration_scores.count() << "ms; " << chr << " processed and written" << endl;
     }
+
     for (int i = 0; i < col_num; i++) {
         omp_destroy_lock(&file_locks[i]);
     }
@@ -1032,8 +1138,12 @@ int main(int argc, char **argv) {
     cout << "Compressing files" << endl;
 #pragma omp parallel for num_threads(cores)
     for (int a_col = 0; a_col < col_num; a_col++) {
-        ofstream gene_info_stream(gene_info_files[a_col], ios_base::app);
-        for (const auto& entry: promoter_map) {
+        ofstream gene_info_stream;
+#pragma omp critical(gene_out)
+        {
+        gene_info_stream.open(gene_info_files[a_col].c_str(), ios_base::app);
+        }
+        for (const auto &entry: promoter_map) {
             int gene_id = entry.first;
             auto gene_map = entry.second;
             if (u_genefile.length() != 0 and u_genefile != "0") {
@@ -1046,7 +1156,7 @@ int main(int argc, char **argv) {
                 fail_message = "Missing normalized contact file";
             } else if (genes_wo_candidates.count(gene_id) == 1) {
                 fail_message = "No candidate regions in gene window";
-            } else if (written_genes.count(gene_id) == 0) {
+            } else if (written_genes[a_col].count(gene_id) == 0) {
                 if (peak_chromosomes.count(gene_map.chr) == 0) {
                     fail_message = "No candidate regions in gene window";
                 } else {
@@ -1066,8 +1176,8 @@ int main(int argc, char **argv) {
                 gene_info_stream << "\t0\t0\t0\t0\t" << fail_message << "\n";
             }
         }
-        gene_info_stream.close();
 
+        gene_info_stream.close();
         GzipFile(out_files[a_col]);
         GzipFile(gene_info_files[a_col]);
     }

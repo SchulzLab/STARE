@@ -1,2 +1,4 @@
 Gene2
 OR4F8
+Gene10
+Nonsense

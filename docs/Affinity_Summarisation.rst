@@ -10,7 +10,7 @@ The basic idea is always the same. We sum up the *tf* affinities of the regions 
   :alt: STARE_BaseEquation
   :target: https://github.com/SchulzLab/STARE/blob/main/Figures/STARE_BaseEquation.pdf
 
-Now the *scaler* is where it changes depending on how the region-gene mapping was done. The different approaches make use of different types of data, which allows to integrate more data modalities.
+Now the *scaler* is where it changes depending on how the region-gene mapping was done. The different approaches make use of different types of data, which allows to integrate more data modalities. When running in **promoter-mode** without any bed-file, we don't have any information for scaling, and thus, the `scaler` is 1.
 
 Gene window
 ******************

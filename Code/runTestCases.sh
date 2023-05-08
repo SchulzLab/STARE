@@ -190,3 +190,11 @@ then
   bash "$working_dir"/controlTestCases.sh -a "$output"/Test_V18 -b "$test_dir"/Test_Controls/Test_V18 -x metadata
   echo ""
 fi
+
+if [[ "$which_test" == "all" ]] || [[ "$which_test" == "19" ]];
+then
+  echo TestV19: Windows 3kb - Promoter windows instead of bed-file
+  bash "$working_dir"/STARE.sh -g "$test_dir"/Test_Data/example_sequence.fa -o "$output"/Test_V19 -s "$test_dir"/Test_Data/Jaspar_Hocomoco_Kellis_human_transfac.txt -a "$test_dir"/Test_Data/example_annotation.gtf -w 3000 -x "$test_dir"/Test_Data/example_exclude_regions.bed
+  bash "$working_dir"/controlTestCases.sh -a "$output"/Test_V19 -b "$test_dir"/Test_Controls/Test_V19 -x metadata
+  echo ""
+fi

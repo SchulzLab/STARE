@@ -3,15 +3,15 @@ set -e  # To abort the whole script if one function returns an error.
 
 # See https://github.com/SchulzLab/STARE for more information and usage.
 # Adapted from TEPIC: https://github.com/SchulzLab/TEPIC
-version_num="1.0.3.1"
+version_num="1.0.4"
 help="STARE version ""$version_num""
 Usage: ./STARE.sh
-[-b/--bed_file bed file containing open chromatin regions]
 [-a/--annotation gene annotation file in gtf-format]
 [-g/--genome input fasta file in RefSeq format]
 [-s/--pscm file with PSCMs in transfac format] OR [-p/--psem file with PSEMs of TFs]
 [-o/--output prefix_path of output files]\n
 Optional parameters:
+[-b/--bed_file bed file containing open chromatin regions, leave empty to run with promoter windows]
 [-w/--window window size around TSS for mapping regions to genes (default 50KB; 5MB for ABC-mode)]
 [-n/--column column in the -b file containing the average per base signal within a peak, start counting at 1]
 [-c/--cores number of cores to use (default 1)]
@@ -122,10 +122,15 @@ then
 	exit 1;
 fi
 
+if [ "${regions}" == "FALSE" ] || [ "${regions}" == "False" ] || [ "${regions}" == "false" ] || [ "${regions}" == "F" ] || [ "${regions}" == "0" ] ;
+then
+  regions="";
+fi
+
 if [ -z "$regions" ] ;
 then
-	echo Open chromatin regions must be specified using the -b/--bed_file parameter
-	exit 1;
+  column=""  # Will serve as marker for the TF_Gene_Scorer that it's the promoter-only mode.
+	echo No bed-file provided, will run on promoter windows
 fi
 
 if [ -z "$prefixP" ] ;
@@ -142,17 +147,17 @@ fi
 
 if [ -n "$hic_contactfolder" ] || [ -n "$hic_binsize" ] && [[ "$existing_abc" == "0" ]];  # With an existing ABC-file, the other flags are ignored.
 then  # If the hic-contactfolder is set to false we can run the ABC-scoring with contact estimate.
-  if [ "${hic_contactfolder}" != "FALSE" ] || [ "${hic_contactfolder}" != "False" ] || [ "${hic_contactfolder}" != "false" ] || [ "${hic_contactfolder}" != "F" ] || [ "${hic_contactfolder}" != "0" ];
+  if [ "${hic_contactfolder}" == "FALSE" ] || [ "${hic_contactfolder}" == "False" ] || [ "${hic_contactfolder}" == "false" ] || [ "${hic_contactfolder}" == "F" ] || [ "${hic_contactfolder}" == "0" ];
   then
-    if [ -z "$hic_contactfolder" ] || [ -z "$hic_binsize" ] || [ -z "$column" ];
+    if [ "${column}" == "0" ];
     then
-      echo "For the ABC-score calculation the column with the peak signal (-n/--column), the path to the normalized contact files (-f/--contact_folder) as well as the the bin size (-k/--bin_size) are required."
+      echo "For the ABC-score calculation with contact estimate the column with the peak signal (-n/--column) is required."
       exit 1;
     fi
   else
-    if [ -z "$column" ];
+    if [ -z "$hic_contactfolder" ] || [ -z "$hic_binsize" ] || [ "${column}" == "0" ];
     then
-      echo "For the ABC-score calculation the column with the peak signal (-n/--column) is required."
+      echo "For the ABC-score calculation the column with the peak signal (-n/--column), the path to the normalized contact files (-f/--contact_folder) as well as the the bin size (-k/--bin_size) are required."
       exit 1;
     fi
   fi
@@ -219,7 +224,12 @@ echo "[Command]" >> "$metadatafile"
 echo "STARE.sh ""$*" >> "$metadatafile"
 echo "" >> "$metadatafile"
 echo "[Inputs]" >> "$metadatafile"
-echo -e "-b region_file\t""$regions" >> "$metadatafile"
+if [ -n "$regions" ] ;
+  then
+    echo -e "-b region_file\t""$regions" >> "$metadatafile"
+else
+    echo -e "-b region_file\t""Using promoter windows" >> "$metadatafile"
+fi
 if [ -n "$column" ] ;
 then
 	echo -e "-n signal_column\t""$column" >> "$metadatafile"
@@ -282,8 +292,11 @@ fi
 
 echo "" >> "$metadatafile"
 echo "[Metrics]" >> "$metadatafile"
-numReg=`grep -c . "$regions"`
-echo -e "Number of provided regions\t""$numReg" >> "$metadatafile"
+if [ -n "$regions" ] ;
+  then
+  numReg=`grep -c . "$regions"`
+  echo -e "Number of provided regions\t""$numReg" >> "$metadatafile"
+fi
 if [ -n "$pscms" ];
 then
   numMat=`grep "//" "$pscms" | wc -l`
@@ -302,6 +315,12 @@ if [ "$(sed -n '/^>chr/p;q' "$genome")" ]; then
   chrPrefix="TRUE"
 else
   chrPrefix="FALSE"
+fi
+
+if [ -z "$regions" ] ;
+then
+  "${working_dir}"/Promoter_Windows -a "${annotation}" -w "${window}" -u "${genes}" -o ${prefixP}"/"${base_prefix}
+  regions=${prefixP}"/"${base_prefix}"_STARE_PromoterWindows.bed"
 fi
 
 filteredRegions=$prefix_path"_candidate_binding_regions"

@@ -175,7 +175,7 @@ int main(int argc, char **argv) {
     // ____________________________________________________________
     unordered_map <int, string> gene_id_map;  // To avoid storing the full gene id string for each data structure.
     unordered_map<string, int> gene_name_map;  // From the ABC-files we don't have the ID.
-    int gene_counter;
+    int gene_counter = 0;
     unordered_map <int, vector<string>> tss_map;  // GeneID: [chr, 5'TSS]
     tss_map.reserve(60000);
     FILE *Read_Gene_Annotation;
@@ -327,7 +327,7 @@ int main(int argc, char **argv) {
     // GET SCALING COLS - if specified
     // ____________________________________________________________
     vector<int> col_indices;
-    if (n_scalingcol != "0") {
+    if (n_scalingcol != "0" and n_scalingcol.length() > 0) {
         // Look into the peakfile to see with how many columns/files we are dealing with.
         ifstream peek_peak(b_scalingfile);
         string line_peek;
@@ -501,7 +501,13 @@ int main(int argc, char **argv) {
     // INTERSECT REGIONS WITH GENE WINDOWS
     // ____________________________________________________________
     // If abc-scoring was done, still do the intersections to include the promoters.
-    string bed_intersect_cmd = "bedtools intersect -a " + temp_window_file + " -b " + temp_region_file + " -wo 2>&1";
+    string bed_intersect_cmd;
+    if (n_scalingcol.length() > 0) {
+        bed_intersect_cmd = "bedtools intersect -a " + temp_window_file + " -b " + temp_region_file + " -wo 2>&1";
+    }
+    else {  // With promoter-windows we need a full intersection to not have redundancy.
+        bed_intersect_cmd = "bedtools intersect -a " + temp_window_file + " -b " + temp_region_file + " -f 1 -F 1 -wo 2>&1";
+    }
     char intersect_buffer[256];  // Only has the gene window and coordinates of the candidate enhancer.
     FILE *bed_intersect_stream = popen(bed_intersect_cmd.c_str(), "r");
     if (bed_intersect_stream) {
@@ -526,7 +532,7 @@ int main(int argc, char **argv) {
     // FETCH POTENTIAL AFFINITY SCALINGS
     // ____________________________________________________________
     // If one or more scaling columns were specified we go through the peak file and fetch them as vector for each region.
-    if (n_scalingcol != "0") {
+    if (n_scalingcol != "0" and n_scalingcol.length() > 0) {
         // Find the total number of columns first.
         cout << "Fetch affinity scalings out of the region file." << endl;
         int row_counter = 0;
@@ -549,7 +555,7 @@ int main(int argc, char **argv) {
             row_counter++;
         }
     }
-
+    cout << "affinities fetched" << endl;  // TODO
     // ____________________________________________________________
     // MAP REGION AFFINITIES TO GENES
     // ____________________________________________________________
@@ -599,7 +605,7 @@ int main(int argc, char **argv) {
                    "AvgPeakSize" + "\n";
         for (int c = 0; c < out_iters; ++c) {
             string column_suffix;
-            if (n_scalingcol != "0") {
+            if (n_scalingcol != "0" and n_scalingcol.length() > 0) {
                 column_suffix = colname_map[col_indices[c]];
                 column_suffix = column_suffix.substr(1, column_suffix.size() - 1);  // To remove the leading _.
             }
@@ -626,7 +632,7 @@ int main(int argc, char **argv) {
     if (not reshape) {
         for (int c = 0; c < out_iters; ++c) {
             string column_suffix;
-            if (n_scalingcol != "0") {
+            if (n_scalingcol != "0" and n_scalingcol.length() > 0) {
                 column_suffix = colname_map[col_indices[c]];
             }
             // Open the output and write the header already.
@@ -674,7 +680,7 @@ int main(int argc, char **argv) {
                     int peak_size = abs(end - start);
 
                     vector<double> affinity_scalers(out_iters, 1);  // Check the conditions and fill once.
-                    if (n_scalingcol != "0") {
+                    if (n_scalingcol != "0" and n_scalingcol.length() > 0) {
                         affinity_scalers = region_info[1];
                     }
                     // Decay is set to false if use_abs_scoring.
@@ -734,7 +740,11 @@ int main(int argc, char **argv) {
         if (not reshape and (gene_batch.size() == batch_size or gene_out_counter == candidate_genes.size())) {
 #pragma omp parallel for num_threads(cores)
             for (int c = 0; c < out_iters; ++c) {
-                ofstream out_stream(out_files[c], ios_base::app);
+                ofstream out_stream;
+#pragma omp critical(out_write)
+                {
+                    out_stream.open(out_files[c].c_str(), ios_base::app);
+                }
                 out_stream.precision(10);
                 for (auto const &curr_gene : gene_batch) {
                     out_stream << gene_id_map[curr_gene.first];
@@ -769,7 +779,7 @@ int main(int argc, char **argv) {
         #pragma omp parallel for num_threads(cores)
         for (int c = 0; c < out_iters; c++) {
             string column_suffix;
-            if (n_scalingcol != "0") {
+            if (n_scalingcol != "0" and n_scalingcol.length() > 0) {
                 column_suffix = colname_map[col_indices[c]];
 	        }
             GzipFile(o_output_prefix + "_TF_Gene_Affinities" + column_suffix + ".txt");

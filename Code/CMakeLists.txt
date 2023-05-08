@@ -15,6 +15,9 @@ add_library( STARELib ${LIB_SOURCES} ${LIB_HEADERS} )
 add_executable( ReplaceInvalidChars ReplaceInvalidChars.cpp )
 target_link_libraries( ReplaceInvalidChars PUBLIC STARELib )
 
+add_executable( Promoter_Windows Promoter_Windows.cpp )
+target_link_libraries( Promoter_Windows PUBLIC STARELib )
+
 add_executable( PSCM_to_PSEM PSCM_to_PSEM.cpp )
 
 add_executable( TRAPmulti TRAPmulti.cpp )

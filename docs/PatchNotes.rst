@@ -2,6 +2,17 @@
 Patch notes
 ============
 
+v1.0.4
+===============
+
+ - From v1.0.3.2: Fixed a bug that caused the Gene-TF-matrices to not include the last batch of genes (max 999).
+ - Now allows a **promoter-mode** when leaving the -b flag empty. That means that STARE will build a promoter window of size -w around the 5'TSS of each gene and summarise the affinities in those instead.
+ - With >200 activity columns the parallelization of STARE_ABCpp switches from chromosomes to gene batches to allow a better scaling for many columns and to limit the required memory.
+ - Catch more cases of combinations of the chr-Prefix in the input files.
+ - Now STARE_ABCpp skips chromosomes without genes, e.g. when filtering for genes with -u.
+ - Fixed that the bin size -k was required although the contact estimate based on distance was selected.
+
+
 v1.0.3
 ===============
 

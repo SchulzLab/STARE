@@ -1,0 +1,31 @@
+[Description]
+process	STARE 1.0.4
+run_by_user	dennis
+date	04_28_23
+time	14_38_12_N
+analysis_id	Test//Test_V19/Test_V19
+
+[Command]
+STARE.sh -g Test//Test_Data/example_sequence.fa -o Test//Test_V19 -s Test//Test_Data/Jaspar_Hocomoco_Kellis_human_transfac.txt -a Test//Test_Data/example_annotation.gtf -w 3000 -x Test//Test_Data/example_exclude_regions.bed
+
+[Inputs]
+-b region_file	Using promoter windows
+-x excluded regions	Test//Test_Data/example_exclude_regions.bed
+
+[References]
+-g genome_reference	Test//Test_Data/example_sequence.fa
+-s pscms	Test//Test_Data/Jaspar_Hocomoco_Kellis_human_transfac.txt
+GC-content	automatic from bed_file
+-a genome_annotation	Test//Test_Data/example_annotation.gtf
+
+[Output path]
+Test//Test_V19
+
+[Parameters]
+-c cores	1
+-w window	3000
+-i tss_mode	all_tss
+-e decay	TRUE
+
+[Metrics]
+Number of considered psems	     818
