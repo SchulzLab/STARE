@@ -134,7 +134,7 @@ fi
 if [[ "$which_test" == "all" ]] || [[ "$which_test" == "12" ]];
 then
   echo TestV12: separate ABC scoring
-  mkdir "$test_dir"/Test_V12
+  mkdir "$output"/Test_V12
   "$working_dir"/STARE_ABCpp -b "$test_dir"/Test_Data/ABC_example_regions_ChrPrefix.bed -n 4 -a "$test_dir"/Test_Data/ABC_example_annotation.gtf -o "$output"/Test_V12/Test_V12 -w 500000 -k 5000 -t 0 -f "$test_dir"/Test_Data/ABC_example_HiCFiles/ -i 5_tss
   bash "$working_dir"/controlTestCases.sh -a "$output"/Test_V12 -b "$test_dir"/Test_Controls/Test_V12 -x metadata
   echo ""
@@ -143,7 +143,7 @@ fi
 if [[ "$which_test" == "all" ]] || [[ "$which_test" == "13" ]];
 then
   echo TestV13: separate ABC scoring - Multiple Signal Columns
-  mkdir "$test_dir"/Test_V13
+  mkdir "$output"/Test_V13
   "$working_dir"/STARE_ABCpp -b "$test_dir"/Test_Data/ABC_example_regions.bed -n 4-5 -a "$test_dir"/Test_Data/ABC_example_annotation.gtf -o "$output"/Test_V13/Test_V13 -w 500000 -k 5000 -t 0 -f "$test_dir"/Test_Data/ABC_example_HiCFiles/ -i 5_tss
   bash "$working_dir"/controlTestCases.sh -a "$output"/Test_V13 -b "$test_dir"/Test_Controls/Test_V13 -x metadata
   echo ""
@@ -152,7 +152,7 @@ fi
 if [[ "$which_test" == "all" ]] || [[ "$which_test" == "14" ]];
 then
   echo TestV14: separate ABC scoring NOT adapted - Multiple Signal Columns
-  mkdir "$test_dir"/Test_V14
+  mkdir "$output"/Test_V14
   "$working_dir"/STARE_ABCpp -b "$test_dir"/Test_Data/ABC_example_regions.bed -n 4,5 -a "$test_dir"/Test_Data/ABC_example_annotation.gtf -o "$output"/Test_V14/Test_V14 -w 500000 -k 5000 -t 0 -f "$test_dir"/Test_Data/ABC_example_HiCFiles/ -q False -i 5_tss
   bash "$working_dir"/controlTestCases.sh -a "$output"/Test_V14 -b "$test_dir"/Test_Controls/Test_V14 -x metadata
   echo ""
@@ -176,7 +176,7 @@ fi
 if [[ "$which_test" == "all" ]] || [[ "$which_test" == "17" ]];
 then
   echo TestV17: separate ABC scoring - Multiple Signal Columns - average TSS
-  mkdir "$test_dir"/Test_V17
+  mkdir "$output"/Test_V17
   "$working_dir"/STARE_ABCpp -b "$test_dir"/Test_Data/ABC_example_regions.bed -n 4-5 -a "$test_dir"/Test_Data/ABC_example_annotation.gtf -o "$output"/Test_V17/Test_V17 -w 500000 -k 5000 -t 0 -f "$test_dir"/Test_Data/ABC_example_HiCFiles/ -i all_tss
   bash "$working_dir"/controlTestCases.sh -a "$output"/Test_V17 -b "$test_dir"/Test_Controls/Test_V17 -x metadata
   echo ""
@@ -185,7 +185,7 @@ fi
 if [[ "$which_test" == "all" ]] || [[ "$which_test" == "18" ]];
 then
   echo TestV18: separate ABC scoring - Use contact estimate - average TSS
-  mkdir "$test_dir"/Test_V18
+  mkdir "$output"/Test_V18
   "$working_dir"/STARE_ABCpp -b "$test_dir"/Test_Data/ABC_example_regions.bed -n 4 -a "$test_dir"/Test_Data/ABC_example_annotation.gtf -o "$output"/Test_V18/Test_V18 -w 500000 -t 0 -f False -i all_tss
   bash "$working_dir"/controlTestCases.sh -a "$output"/Test_V18 -b "$test_dir"/Test_Controls/Test_V18 -x metadata
   echo ""
