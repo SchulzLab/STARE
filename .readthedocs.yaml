@@ -16,7 +16,7 @@ build:
     # golang: "1.19"
 
 python:
-install:
+  install:
   - requirements: docs/requirements.txt
 
 # Build documentation in the docs/ directory with Sphinx
