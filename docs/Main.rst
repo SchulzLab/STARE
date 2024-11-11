@@ -201,11 +201,11 @@ STARE expects a gzipped file of contact data for each chromosome. The contact fr
 
 We provide a small bash script that can produce those files from a .hic-file, using `Juicer's data extraction <https://github.com/aidenlab/juicer/wiki/Data-Extraction>`_. After installation of Juicer you can call the script via::
 
-   ./Code/Juicebox_KR_normalization.sh -j <path_juicer_jar_file> -h <hic_path> -d <out_path> -c <chromosomes> -b <bin_size>
+   ./Code/Juicebox_normalization.sh -j <path_juicer_jar_file> -h <hic_path> -n KR -d <out_path> -c <chromosomes> -b <bin_size>
 
-Specifying the chromosomes is optional, by default chr1-22 will be written. You can give a range or individual ones as comma-separated (e.g. 1-22 or 1,5,7,X). Be aware that we currently don't catch all combinations of chromosome options. Bin size defaults to 5kb. 
+-n can be KR (Knight-Ruiz), VQ (Vector Quantized) or VQ_SQRT. We mainly work with KR, but it sometimes does not converge, especially for small chromosomes. Specifying the chromosomes with -c is optional, by default chr1-22 will be written. You can give a range or individual ones as comma-separated (e.g. 1-22 or 1,5,7,X). Be aware that we currently don't catch all combinations of chromosome options. Bin size defaults to 5kb. 
 
-If you don't have matching contact data at hand, the average hg19 Hi-C matrix provided by `Fulco et al. (2019) <https://doi.org/10.1038/s41588-019-0538-0>`_ was always a good substitution in our hands (ftp://ftp.broadinstitute.org/outgoing/lincRNA/average_hic/average_hic.v2.191020.tar.gz, ~20GB, folder structure has to be adapted as described above).
+If you don't have matching contact data at hand, the average hg19 Hi-C matrix provided by `Fulco et al. (2019) <https://doi.org/10.1038/s41588-019-0538-0>`_ was always a good substitution in our hands (ftp://ftp.broadinstitute.org/outgoing/lincRNA/average_hic/average_hic.v2.191020.tar.gz, ~20GB, folder structure has to be adapted as described above). Similarly for hg38, `Gschwind et al. (2023) <https://doi.org/10.1101/2023.11.09.563812>`_ published an averaged matrix covering even more cell types which they provide via `ENCODE <https://www.encodeproject.org/files/ENCFF134PUN/>`_ . Note, that this matrix is large which makes computing with it require a considerable amount of RAM.
 
 Another option is to set the -f flag to "false". In this case, a contact estimate based on a fractal globule model is used (see `Lieberman-Aiden et al. 2009 <https://doi.org/10.1126/science.1181369>`_). That uses the inverse of the distance. We added an offset of 5kb for the ABC-scoring, so that the contact c at distance d becomes:
 
