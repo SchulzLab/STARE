@@ -44,7 +44,7 @@ for file in $(find "$folder1" -type f); do
     else
       sort "$folder1""$base_file" > "$folder1""$base_file"_sorted
       sort "$folder2""$base_file" > "$folder2""$base_file"_sorted
-      if ! cmp --silent -- "$folder1""$base_file" "$folder2""$base_file"; then
+      if ! cmp --silent -- "$folder1""$base_file"_sorted "$folder2""$base_file"_sorted; then
         echo "ERROR: test file differs with control file:" "$folder1""$base_file" "$folder2""$base_file"
       fi
       rm  "$folder1""$base_file"_sorted
