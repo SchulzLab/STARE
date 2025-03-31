@@ -14,7 +14,7 @@ Headers are allowed in bed-files, and also encouraged to label the activity colu
 
 Gene annotation and gene IDs
 ******************
-STARE relies heavily on the gtf-file you provide. It will consider all entries where the 3rd column (1-based) equals 'gene' when using -i 5_tss, or 'transcript' when using -i all_tss. Within those entries it will take the string that follows 'gene_id' in the last column as identifier. The ABC-scoring step also retrieves the string after 'gene_name'. Make sure that the format is consistent, and that gene IDs in other files are present in your gtf-file. For example, if you give a list of genes with the -u flag in the style of 'ENSG00000223972', but your gtf-file has 'ENSG00000223972.4', you won't get any results.
+STARE relies heavily on the gtf-file you provide. It will consider all entries where the 3rd column (1-based) equals 'gene' when using -i 5_tss, or 'transcript' when using -i all_tss. Within those entries it will take the string that follows 'gene_id' in the last column as identifier. The ABC-scoring step also retrieves the string after 'gene_name', if there is one. Make sure that the format is consistent, and that gene IDs in other files are present in your gtf-file. For example, if you give a list of genes with the -u flag in the style of 'ENSG00000223972', but your gtf-file has 'ENSG00000223972.4', you won't get any results.
 
 The *chr* prefix
 ******************

@@ -1,9 +1,10 @@
 
+============
 Patch notes
 ============
 
 v1.0.5
-===============
+***************
 
  - The STARE_ABCpp binary now creates its own metadata file, listing the used command that called the script along with all the flags.
  - The printouts from STARE_ABCpp when parameters are missing is now more informative. 
@@ -12,7 +13,7 @@ v1.0.5
  
 
 v1.0.4
-===============
+***************
 
  - From v1.0.3.2: Fixed a bug that caused the Gene-TF-matrices to not include the last batch of genes (max 999).
  - Now allows a **promoter-mode** when leaving the -b flag empty. That means that STARE will build a promoter window of size -w around the 5'TSS of each gene and summarise the affinities in those instead.
@@ -23,7 +24,7 @@ v1.0.4
 
 
 v1.0.3
-===============
+***************
 
  - We found another improvement over the regular ABC score by including information across all annotated TSS of a gene, which we call the generalised ABC (gABC) score. This is the default option now for the ABC part.
  - According to the previous point we added a flag (-i / --tss_mode) which allows to decide whether to use all TSS (all_tss) or just the 5' (5_tss).
@@ -32,7 +33,7 @@ v1.0.3
 
 
 v1.0.2
-===============
+***************
 
    - Genes which don't have any regions in their defined window to sum up the TF affinities from will no longer be written to output, only to the discarded_Genes.txt file.
    - Restructured the processing to be more efficient for many activity columns.
@@ -44,7 +45,7 @@ v1.0.2
 
 
 v1.0.1
-===============
+***************
 
     - Introduced the -u / --genes flag. The output will be limited to the gene IDs/symbols in that file. 
     - Introduced the -z / --reshape flag, which will write the gene-TF matrices in binary format.
