@@ -19,6 +19,8 @@
 # include <getopt.h>
 # include <stdio.h>
 # include <stdlib.h>
+# include <chrono>
+# include <ctime>   
 # include <omp.h>
 # include <boost/numeric/ublas/matrix_sparse.hpp>
 # include "STARE_MiscFunctions.h"
@@ -180,12 +182,19 @@ int main(int argc, char **argv) {
     }
 
     // Check if there is an argument for each parameter.
-    for (const string &p: {b_peakfile, a_promoterfile, o_prefix}) {
-        if (p.empty()) {
-            cout << "Required parameter missing" << endl;
-            cout << parameter_help << endl;
-            return 1;
+    map<string, string> required_map{{"-b peak file", b_peakfile}, {"-a gene annotation", a_promoterfile}, {"-o output path", o_prefix}};
+    vector<string> missing_parameters;
+    for (const auto& req_entry : required_map){
+        if (req_entry.second.empty()) {
+            missing_parameters.push_back(req_entry.first);
         }
+    }
+    if (!missing_parameters.empty()){
+        for (const auto& miss : missing_parameters){
+            cout << "Required parameter missing: " << miss << endl;
+        }
+        cout << parameter_help << endl;
+        return 1;
     }
 
     // If not given as input, set to default.
@@ -227,6 +236,35 @@ int main(int argc, char **argv) {
     }
 
     // ____________________________________________________________
+    // WRITE METADATA FILE
+    // ____________________________________________________________
+    string metadata_file = o_prefix + "_ABCpp_metadata.txt";
+    ofstream metadata_out(metadata_file);
+    Test_outfile(metadata_out, metadata_file);
+    // Write the entire command first.
+    for (int i = 0; i < argc; ++i) {
+        metadata_out << argv[i] << " ";
+    }
+    time_t formatted_time = chrono::system_clock::to_time_t(chrono::system_clock::now());
+    metadata_out << endl << "Time: " << ctime(&formatted_time) << endl;
+    metadata_out << "-b peak file: " << b_peakfile << endl;
+    metadata_out << "-n activity column: " << activity_col << endl;
+    metadata_out << "-a gene annotation: " << a_promoterfile << endl;
+    metadata_out << "-u gene list: " << u_genefile << endl;
+    metadata_out << "-w gene window size: " << gene_windowsize*2 << endl;  // We previously divided it by 2. 
+    metadata_out << "-f contact data: " << f_contactfolder << endl;
+    metadata_out << "-k contact bin size: " << bin_size << endl;
+    metadata_out << "-t score cutoff: " << abc_cutoff << endl;
+    metadata_out << "-x bed with regions to exclude: " << x_exclude_regions << endl;
+    metadata_out << "-d do pseudocount: " << do_pseudocount << endl;
+    metadata_out << "-i TSS mode: " << tss_type << endl;
+    metadata_out << "-q do adjusted ABC: " << do_adjusted_abc << endl;
+    metadata_out << "-m window size for activity adjustment: " << enh_windowsize*2 << endl;
+    metadata_out << "-c cores: " << cores << endl;
+    metadata_out << "-o output path: " << o_prefix << endl;
+    metadata_out.close();
+
+    // ____________________________________________________________
     // PROCESS GTF GENE ANNOTATION
     // ____________________________________________________________
     cout << "Reading annotation and intersecting peaks" << endl;
@@ -260,22 +298,22 @@ int main(int argc, char **argv) {
                     int id_end = columns[8].find(';', id_start);
                     string gene_id = columns[8].substr(id_start + 1,
                                                        id_end - id_start - 2);  // Remove the quotation marks.
+
+                    string gene_name;
                     string name_delimiter = "gene_name ";
-                    size_t name_start = columns[8].find(name_delimiter, 0) + name_delimiter.size();
-                    int name_end = columns[8].find(';', name_start);
-                    string gene_name = columns[8].substr(name_start + 1, name_end - name_start -
+                    size_t name_start = columns[8].find(name_delimiter, 0);
+                    if (name_start == string::npos) {  // Means there's no entry for the gene name.
+                        gene_name = gene_id;
+                    } else {
+                        name_start = name_start + name_delimiter.size();
+                        int name_end = columns[8].find(';', name_start);
+                        gene_name = columns[8].substr(name_start + 1, name_end - name_start -
                                                                          2);  // Remove the quotation marks.
+                    }
+
                     string strand = columns[6];
                     string chr = columns[0];
-                    if (first_line) {
-                        if (chr.substr(0, 3) == "chr") {
-                            gene_chr_prefix = true;
-                        } else {
-                            gene_chr_prefix = false;
-                        }
-                        first_line = false;
-                    }
-                    if (gene_chr_prefix) {
+                    if (chr.substr(0, 3) == "chr") {
                         chr = chr.substr(3);
                     }
                     int gene_start;
@@ -393,7 +431,7 @@ int main(int argc, char **argv) {
     // Is not written directly on gtf-file read, as we need to find the most 5'-TSS first.
     int intersect_window = gene_windowsize;
     if (enh_windowsize > gene_windowsize) {
-        intersect_window = enh_windowsize;
+        intersect_window = enh_windowsize;  // The condition on the interaction distance is still on the gene_windowsize.
     }
 
     string temp_window_file = o_prefix + "_ABCpp_Temp_GeneWindow.bed";
@@ -416,7 +454,6 @@ int main(int argc, char **argv) {
                    << gene.first << "\n";
     }
     window_out.close();
-
 
     // ____________________________________________________________
     // READ ACTIVITIES AND WRITE BED-FILE WITH LOCATIONS ONLY
@@ -1189,6 +1226,4 @@ int main(int argc, char **argv) {
     auto duration0 = chrono::duration_cast<chrono::seconds>(stop0 - start0);
     cout << duration0.count() << "s ABCpp in total" << endl;
 }
-
-
 

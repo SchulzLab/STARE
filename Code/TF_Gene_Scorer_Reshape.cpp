@@ -199,10 +199,19 @@ int main(int argc, char **argv) {
                     int id_end = columns[8].find(';', id_start);
                     string gene_string = columns[8].substr(id_start + 1,
                                                        id_end - id_start - 2);  // Removing the quotation marks.
+                    
+                    string gene_name;
                     string name_delimiter = "gene_name ";
-                    size_t name_start = columns[8].find(name_delimiter, 0) + name_delimiter.size();
-                    int name_end = columns[8].find(';', name_start);
-                    string gene_name = columns[8].substr(name_start + 1, name_end - name_start - 2);
+                    size_t name_start = columns[8].find(name_delimiter, 0);
+                    if (name_start == string::npos) {  // Means there's no entry for the gene name.
+                        gene_name = gene_string;
+                    } else {
+                        name_start = name_start + name_delimiter.size();
+                        int name_end = columns[8].find(';', name_start);
+                        gene_name = columns[8].substr(name_start + 1, name_end - name_start -
+                                                                         2);  // Remove the quotation marks.
+                    }
+                    
                     if (u_genefile.length() != 0 and u_genefile != "0") {
                         if ((filter_genes.count(gene_string) == 0) and (filter_genes.count(gene_name) == 0)) {
                             continue;

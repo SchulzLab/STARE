@@ -2,6 +2,15 @@
 Patch notes
 ============
 
+v1.0.5
+===============
+
+ - The STARE_ABCpp binary now creates its own metadata file, listing the used command that called the script along with all the flags.
+ - The printouts from STARE_ABCpp when parameters are missing is now more informative. 
+ - Gtf-files are now handled more flexibly, catching cases of non-reference chromosomes and missing gene names.
+ - Minor fixes for the test cases.
+ 
+
 v1.0.4
 ===============
 

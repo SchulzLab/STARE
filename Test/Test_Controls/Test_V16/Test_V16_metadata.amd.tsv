@@ -1,0 +1,38 @@
+[Description]
+process	STARE 1.0.4
+run_by_user	dhecker
+date	03_26_25
+time	12_58_32_260474017
+analysis_id	RETEST/Test_V16/Test_V16
+
+[Command]
+STARE.sh -g Github/Test//Test_Data/example_sequence_chr21part.fa -b Github/Test//Test_Data/ABC_example_regions.bed -o RETEST/Test_V16 -s Github/Test//Test_Data/Jaspar_Hocomoco_Kellis_human_transfac.txt -a Github/Test//Test_Data/ABC_example_annotation.gtf -w 500000 -n 4+ -f Github/Test//Test_Data/ABC_example_HiCFiles/ -k 5000 -t 0 -z True -i 5_tss
+
+[Inputs]
+-b region_file	Github/Test//Test_Data/ABC_example_regions.bed
+-n signal_column	4+
+
+[References]
+-g genome_reference	Github/Test//Test_Data/example_sequence_chr21part.fa
+-s pscms	Github/Test//Test_Data/Jaspar_Hocomoco_Kellis_human_transfac.txt
+GC-content	automatic from bed_file
+-a genome_annotation	Github/Test//Test_Data/ABC_example_annotation.gtf
+
+[Output path]
+RETEST/Test_V16
+
+[Parameters]
+-c cores	1
+-w window	500000
+-i tss_mode	5_tss
+-f path with hi-c contact files	Github/Test//Test_Data/ABC_example_HiCFiles/
+-k bin size of hi-c contacts	5000
+-t ABC-score cut-off	0
+-d Use pseudocount for contact frequency	TRUE
+-q Use adaptedABC version	TRUE
+-m Window size for the adaptedABC	5000000
+-z Reshaping to binary output	TRUE
+
+[Metrics]
+Number of provided regions	7
+Number of considered psems	818

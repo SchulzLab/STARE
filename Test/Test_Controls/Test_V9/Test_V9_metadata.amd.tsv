@@ -1,31 +1,31 @@
 [Description]
-process	STARE 1.0.3
-run_by_user	dennis
-date	11_29_22
-time	14_37_36_N
-analysis_id	../Test//Test_V9/Test_V9
+process	STARE 1.0.4
+run_by_user	dhecker
+date	03_26_25
+time	12_58_28_045727985
+analysis_id	RETEST/Test_V9/Test_V9
 
 [Command]
-STARE.sh -g ../Test//Test_Data/example_sequence_chr21part.fa -b ../Test//Test_Data/ABC_example_regions.bed -o ../Test//Test_V9 -p ../Test//Test_Data/Jaspar_Hocomoco_Kellis_human_PSEMs.txt -a ../Test//Test_Data/ABC_example_annotation.gtf -n 4+ -r ../Test//Test_Data/example_ABCpp_scoredInteractions_c4.txt.gz
+STARE.sh -g Github/Test//Test_Data/example_sequence_chr21part.fa -b Github/Test//Test_Data/ABC_example_regions.bed -o RETEST/Test_V9 -p Github/Test//Test_Data/Jaspar_Hocomoco_Kellis_human_PSEMs.txt -a Github/Test//Test_Data/ABC_example_annotation.gtf -n 4+ -r Github/Test//Test_Data/example_ABCpp_scoredInteractions_c4.txt.gz
 
 [Inputs]
--b region_file	../Test//Test_Data/ABC_example_regions.bed
+-b region_file	Github/Test//Test_Data/ABC_example_regions.bed
 -n signal_column	4+
 
 [References]
--g genome_reference	../Test//Test_Data/example_sequence_chr21part.fa
--p psems	../Test//Test_Data/Jaspar_Hocomoco_Kellis_human_PSEMs.txt
--a genome_annotation	../Test//Test_Data/ABC_example_annotation.gtf
+-g genome_reference	Github/Test//Test_Data/example_sequence_chr21part.fa
+-p psems	Github/Test//Test_Data/Jaspar_Hocomoco_Kellis_human_PSEMs.txt
+-a genome_annotation	Github/Test//Test_Data/ABC_example_annotation.gtf
 
 [Output path]
-../Test//Test_V9
+RETEST/Test_V9
 
 [Parameters]
 -c cores	1
 -w window	50000
 -i tss_mode	all_tss
--r existing ABC-score file that was used	../Test//Test_Data/example_ABCpp_scoredInteractions_c4.txt.gz
+-r existing ABC-score file that was used	Github/Test//Test_Data/example_ABCpp_scoredInteractions_c4.txt.gz
 
 [Metrics]
 Number of provided regions	7
-Number of considered psems	     818
+Number of considered psems	818

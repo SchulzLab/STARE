@@ -1,24 +1,24 @@
 [Description]
-process	STARE 1.0.3
-run_by_user	dennis
-date	11_29_22
-time	14_37_31_N
-analysis_id	../Test//Test_V2/Test_V2
+process	STARE 1.0.4
+run_by_user	dhecker
+date	03_26_25
+time	12_58_22_610300069
+analysis_id	RETEST/Test_V2/Test_V2
 
 [Command]
-STARE.sh --genome=../Test//Test_Data/example_sequence.fa --bed_file=../Test//Test_Data/example_regions.bed --output=../Test//Test_V2 --psem=../Test//Test_Data/Jaspar_Hocomoco_Kellis_human_PSEMs.txt --annotation=../Test//Test_Data/example_annotation.gtf --window=3000 --decay=FALSE
+STARE.sh --genome=Github/Test//Test_Data/example_sequence.fa --bed_file=Github/Test//Test_Data/example_regions.bed --output=RETEST/Test_V2 --psem=Github/Test//Test_Data/Jaspar_Hocomoco_Kellis_human_PSEMs.txt --annotation=Github/Test//Test_Data/example_annotation.gtf --window=3000 --decay=FALSE
 
 [Inputs]
--b region_file	../Test//Test_Data/example_regions.bed
+-b region_file	Github/Test//Test_Data/example_regions.bed
 -n signal_column	0
 
 [References]
--g genome_reference	../Test//Test_Data/example_sequence.fa
--p psems	../Test//Test_Data/Jaspar_Hocomoco_Kellis_human_PSEMs.txt
--a genome_annotation	../Test//Test_Data/example_annotation.gtf
+-g genome_reference	Github/Test//Test_Data/example_sequence.fa
+-p psems	Github/Test//Test_Data/Jaspar_Hocomoco_Kellis_human_PSEMs.txt
+-a genome_annotation	Github/Test//Test_Data/example_annotation.gtf
 
 [Output path]
-../Test//Test_V2
+RETEST/Test_V2
 
 [Parameters]
 -c cores	1
@@ -28,4 +28,4 @@ STARE.sh --genome=../Test//Test_Data/example_sequence.fa --bed_file=../Test//Tes
 
 [Metrics]
 Number of provided regions	7
-Number of considered psems	     818
+Number of considered psems	818

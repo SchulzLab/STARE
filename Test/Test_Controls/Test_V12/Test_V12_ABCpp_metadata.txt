@@ -1,0 +1,18 @@
+/projects/triangulate/work/STARE/Github_binaries/STARE_ABCpp -b Github/Test//Test_Data/ABC_example_regions_ChrPrefix.bed -n 4 -a Github/Test//Test_Data/ABC_example_annotation.gtf -o RETEST/Test_V12/Test_V12 -w 500000 -k 5000 -t 0 -f Github/Test//Test_Data/ABC_example_HiCFiles/ -i 5_tss 
+Time: Wed Mar 26 12:58:30 2025
+
+-b peak file: Github/Test//Test_Data/ABC_example_regions_ChrPrefix.bed
+-n activity column: 4
+-a gene annotation: Github/Test//Test_Data/ABC_example_annotation.gtf
+-u gene list: 
+-w gene window size: 500000
+-f contact data: Github/Test//Test_Data/ABC_example_HiCFiles/
+-k contact bin size: 5000
+-t score cutoff: 0
+-x bed with regions to exclude: 
+-d do pseudocount: 1
+-i TSS mode: 5_tss
+-q do adjusted ABC: 1
+-m window size for activity adjustment: 5000000
+-c cores: 1
+-o output path: RETEST/Test_V12/Test_V12

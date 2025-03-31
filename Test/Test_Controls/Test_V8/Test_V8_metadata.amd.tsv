@@ -1,31 +1,31 @@
 [Description]
-process	STARE 1.0.3
-run_by_user	dennis
-date	11_29_22
-time	14_37_35_N
-analysis_id	../Test//Test_V8/Test_V8
+process	STARE 1.0.4
+run_by_user	dhecker
+date	03_26_25
+time	12_58_27_148498031
+analysis_id	RETEST/Test_V8/Test_V8
 
 [Command]
-STARE.sh -g ../Test//Test_Data/example_sequence_chr21part.fa -b ../Test//Test_Data/ABC_example_regions.bed -o ../Test//Test_V8 -p ../Test//Test_Data/Jaspar_Hocomoco_Kellis_human_PSEMs.txt -a ../Test//Test_Data/ABC_example_annotation.gtf -w 500000 -n 4+ -f ../Test//Test_Data/ABC_example_HiCFiles/ -k 5000 -t 0 -u ../Test//Test_Data/example_genes.txt -i 5_tss
+STARE.sh -g Github/Test//Test_Data/example_sequence_chr21part.fa -b Github/Test//Test_Data/ABC_example_regions.bed -o RETEST/Test_V8 -p Github/Test//Test_Data/Jaspar_Hocomoco_Kellis_human_PSEMs.txt -a Github/Test//Test_Data/ABC_example_annotation.gtf -w 500000 -n 4+ -f Github/Test//Test_Data/ABC_example_HiCFiles/ -k 5000 -t 0 -u Github/Test//Test_Data/example_genes.txt -i 5_tss
 
 [Inputs]
--b region_file	../Test//Test_Data/ABC_example_regions.bed
+-b region_file	Github/Test//Test_Data/ABC_example_regions.bed
 -n signal_column	4+
--u gene set	../Test//Test_Data/example_genes.txt
+-u gene set	Github/Test//Test_Data/example_genes.txt
 
 [References]
--g genome_reference	../Test//Test_Data/example_sequence_chr21part.fa
--p psems	../Test//Test_Data/Jaspar_Hocomoco_Kellis_human_PSEMs.txt
--a genome_annotation	../Test//Test_Data/ABC_example_annotation.gtf
+-g genome_reference	Github/Test//Test_Data/example_sequence_chr21part.fa
+-p psems	Github/Test//Test_Data/Jaspar_Hocomoco_Kellis_human_PSEMs.txt
+-a genome_annotation	Github/Test//Test_Data/ABC_example_annotation.gtf
 
 [Output path]
-../Test//Test_V8
+RETEST/Test_V8
 
 [Parameters]
 -c cores	1
 -w window	500000
 -i tss_mode	5_tss
--f path with hi-c contact files	../Test//Test_Data/ABC_example_HiCFiles/
+-f path with hi-c contact files	Github/Test//Test_Data/ABC_example_HiCFiles/
 -k bin size of hi-c contacts	5000
 -t ABC-score cut-off	0
 -d Use pseudocount for contact frequency	TRUE
@@ -34,4 +34,4 @@ STARE.sh -g ../Test//Test_Data/example_sequence_chr21part.fa -b ../Test//Test_Da
 
 [Metrics]
 Number of provided regions	7
-Number of considered psems	     818
+Number of considered psems	818

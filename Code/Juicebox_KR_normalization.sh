@@ -20,7 +20,7 @@ chromosomes="1-22"
 bin_size=5000
 
 # Parsing command line.
-while getopts "h:d:j:c:" o;
+while getopts "h:d:j:c:b:" o;
 do
 case $o in
 	h)	hic_file=$OPTARG;;

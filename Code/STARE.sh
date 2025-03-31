@@ -3,7 +3,7 @@ set -e  # To abort the whole script if one function returns an error.
 
 # See https://github.com/SchulzLab/STARE for more information and usage.
 # Adapted from TEPIC: https://github.com/SchulzLab/TEPIC
-version_num="1.0.4"
+version_num="1.0.5"
 help="STARE version ""$version_num""
 Usage: ./STARE.sh
 [-a/--annotation gene annotation file in gtf-format]

@@ -82,7 +82,6 @@ You can also choose individual tests by giving the respective number, if you don
 
     ./Code/runTestCases.sh -i <path to /Test/> -o <output path> -t 7
 
-NOTE: The tests 12, 13, 14, 17 and 18 are currently bugged in the 1.0.4 release. This is fixed in the GitHub repository and will be included in a new release.
 
 ***************
 Input and options
@@ -108,18 +107,18 @@ Do not mix those styles, that won't work. You will notice that the one-character
 Required input
 ===============
 
-The table below provides the list of all input data (together with their corresponding arguments) that are mandatory. If you miss one, STARE should notice and tell you. You will find examples for each in **/Test/Test_Data/**.
+The table below provides the list of all input data (together with their corresponding arguments) that are mandatory, followed by the optional ones. If you miss one, STARE should notice and tell you. Some flags will be explained in more detail below the tables, marked with an asterisk (:sup:`*`). Flags that are also used by the ABC-mode are labelled accordingly (:sup:`ABC`), see also below the section `Separate ABC scoring <https://stare.readthedocs.io/en/latest/Main.html#separate-abc-scoring>`. You will find examples for each in **/Test/Test_Data/**.
 
 +------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 |Flag                          |Description                                                                                                                                                                                                                                                                                                                                                                                                                                       |
 +==============================+==================================================================================================================================================================================================================================================================================================================================================================================================================================================+
-|-a / --annotation             |Gene annotation file in gtf-format (for example from `Gencode <https://www.gencodegenes.org/>`_ the Comprehensive gene annotation for the reference chromosomes). It is advised to give the full annotation and not only a subset in particular when running the generalised ABC-scoring approach as we require the information of all genes.                                                                                                     |
+|-a / --annotation ABC         |Gene annotation file in gtf-format (for example from `Gencode <https://www.gencodegenes.org/>`_ the Comprehensive gene annotation for the reference chromosomes). It is advised to give the full annotation and not only a subset in particular when running the generalised ABC-scoring approach as we require the information of all genes.                                                                                                     |
 +------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 |-g / --genome                 |Genome fasta file in RefSeq format.                                                                                                                                                                                                                                                                                                                                                                                                               |
 +------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 |-p / --psem **or** -s / --pscm|Either one of the provided PSEMs (Position Specific Energy Matrix) or an own PSCM (Position Specific Count Matrix) in transfac format which will then be automatically converted to PSEM using the sequence content of the --bed_file as background. You can optionally also specify a different GC-content with the -y flag as described below. For details see `PSEMs and PSCMs <https://stare.readthedocs.io/en/latest/PSEMs_and_PSCMs.html>`_.|
 +------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-|-o / --output                 |Name of the output folder. The folder will be created and can't already exists to prevent overwriting of files. All output files will have the folder name as prefix.                                                                                                                                                                                                                                                                             |
+|-o / --output ABC             |Name of the output folder. The folder will be created and can't already exists to prevent overwriting of files. All output files will have the folder name as prefix.                                                                                                                                                                                                                                                                             |
 +------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 
 
@@ -127,32 +126,43 @@ The table below provides the list of all input data (together with their corresp
 Other input options
 ===============
 
-There are more tunable options for STARE, some of which will be explained in more detail below the table, marked with an asterisk (:sup:`*`). Flags that are related to the ABC-mode are labelled accordingly (:sup:`ABC`).
-
 +--------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 |Flag                            |Description                                                                                                                                                                                                                                                                         |
 +================================+====================================================================================================================================================================================================================================================================================+
-|-b / --bed_file *               |Bed-file with your non-overlapping candidate regions. If you leave this empty STARE will run in promoter-mode instead and construct promoter windows size -w around the 5'TSS to summarise TF affinities. Headers are allowed if they start with # and do not contain whitespaces.  |
+|-b / --bed_file * & ABC         |Bed-file with your non-overlapping candidate regions. If you leave this empty STARE will run in promoter-mode instead and construct promoter windows size -w around the 5'TSS to summarise TF affinities. Headers are allowed if they start with # and do not contain whitespaces.  |
 +--------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-|-w / --window                   |Window size centred at the 5' TSS in which regions from the --bed_file will be considered for a gene (Default 50KB for non-ABC-mode and 5MB for ABC-mode). E.g. 5MB means ±2.5MB around the TSS.                                                                                    |
+|-w / --window ABC               |Window size centred at the 5' TSS in which regions from the --bed_file will be considered for a gene (Default 50KB for non-ABC-mode and 5MB for ABC-mode). E.g. 5MB means ±2.5MB around the TSS.                                                                                    |
 +--------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 |-n / --column * & ABC           |Column(s) in the --bed_file representing the activity of the region. The activity has to be ≥ 0. You will get one set of output files for each column. Start counting at 1. Allowed formats are individual columns                                                                  |
 +--------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-|-c / --cores                    |Number of cores to provide for parallel computing. Note that the processing is also heavy on memory.                                                                                                                                                                                |
+|-c / --cores ABC                |Number of cores to provide for parallel computing. Note that the processing is also heavy on memory.                                                                                                                                                                                |
 +--------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-|-x / --exclude_bed              |Bed-file with regions to exclude. All regions in the --bed_file with ≥ 1 bp overlap will be discarded from all further analyses.                                                                                                                                                    |
+|-x / --exclude_bed ABC          |Bed-file with regions to exclude. All regions in the --bed_file with ≥ 1 bp overlap will be discarded from all further analyses.                                                                                                                                                    |
 +--------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-|-u / --genes                    |File with rows of gene IDs/symbols to limit the output to. The respective IDs/symbols must be present in the gtf-file (-a) including all potential version suffixes like ENSG00000164458.5. If you don't give any gene list you will get the result for all genes in the gtf-file.  |
+|-u / --genes ABC                |File with rows of gene IDs/symbols to limit the output to. The respective IDs/symbols must be present in the gtf-file (-a) including all potential version suffixes like ENSG00000164458.5. If you don't give any gene list you will get the result for all genes in the gtf-file.  |
 +--------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-|-i / --tss_mode ABC             |Set to all_tss to average across all annotated TSS for ABC-scoring or 5_tss to use only the 5' TSS (default all_tss).                                                                                                                                                               |
+|-i / --tss_mode ABC             |Set to all_tss to average across all annotated TSS for ABC-scoring or 5_tss to use only the 5' TSS (Default all_tss).                                                                                                                                                               |
 +--------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 |-q / --adapted_abc ABC          |Whether to use the use the adapted activity for ABC-scoring or the 'original' one (Default True).                                                                                                                                                                                   |
 +--------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 |-f / --contact_folder * & ABC   |Path to directory containing normalized chromatin contact files in coordinate format (bin|bin|contact) one gzipped file for each chromosome. Alternatively set to false to instead use a contact estimate based on distance.                                                        |
 +--------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-
-
-
+|-k / --bin_size ABC             |Bin size/resolution of the contact data. E.g. 5000 for a 5kb resolution.                                                                                                                                                                                                            |
++--------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+|-t / --cutoff ABC               |Cutoff for the ABC-score, only interactions above it are written to output (Default 0.02). Set to 0 to get all possible interactions within the window. Interactions with 0 activity/adapted activity are skipped either way.                                                       |
++--------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+|-d / --pseudocount ABC          |Whether to use a pseudocount for the contact frequency in the ABC-score (Default True).                                                                                                                                                                                             |
++--------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+|-m / enhancer_window ABC        |Size of the window around your candidate regions in which genes are considered for the adapted activity adjustment (Default 5MB; will be minimally set to -w).                                                                                                                      |
++--------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+|-y / --gc_content               |Mean GC-content to calculate PSEMs, by default this is automatically derived from your bed_file.                                                                                                                                                                                    |
++--------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+|-e / --decay                    |Whether exponential distance decay should be used for the affinity calculation (default TRUE, but not used in ABC-mode)                                                                                                                                                             |
++--------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+|-z / --reshape                  |Whether to write a binary output (default False), optional input for GAZE, see `Binary Reshape <https://stare.readthedocs.io/en/latest/Binary_Reshape.html>`_.                                                                                                                      |
++--------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+|-r / --existing_abc *           |Path to a ABC-scoring file, if already calculated once for this input to avoid redundant calculation.                                                                                                                                                                               |
++--------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 
 
 -b / --bed_file
@@ -163,7 +173,7 @@ It is possible to leave this flag empty, causing STARE to run in **promoter-mode
 -n / --column
 ------------------
 
--n / --column points to an activity column or multiple activity columns in the --bed_file. For once, this is required for the 'A' in ABC-score. This can be the read counts of DNase-seq, ATAC-seq, H3K27ac ChIP-seq, or any other measurement which represents enhancer activity. You can also use other metrics, like enrichment scores or -log(p-values), as long as it is ≥ 0, comparable between peaks and indicates how active an enhancer is. Any combination of measurements is of course also possible.
+-n / --column points to an activity column or multiple activity columns in the --bed_file. For once, this is required for the 'A' in ABC-score. This can be the read counts of DNase-seq, ATAC-seq, H3K27ac ChIP-seq, or any other measurement which represents enhancer activity. You can also use other metrics, like enrichment scores or -log(p-values), as long as it is ≥ 0, comparable between peaks and indicates how active an enhancer is (the larger the value the more active). Any combination of measurements is of course also possible.
 
 But why multiple columns? You can specify multiple columns if you have data from multiple cell types/samples with one unified set of candidate regions, but multiple activity measurements. This can be either on the level of individual cells, aggregated cells, like metacells, or cell types. The figure below should illustrate this idea. You can also see examples how to select columns with the -n flag.
 
@@ -173,7 +183,6 @@ But why multiple columns? You can specify multiple columns if you have data from
   :target: https://github.com/SchulzLab/STARE/blob/main/Figures/STARE_ColumnOptions.pdf
 
 
-As of now, there is no option to use chromatin contact data on single-cell level. You would have to create your own interaction file (see below in the section about the --existing-abc). Also, if you have a separate set of regions for each cell, you would have to call STARE separately for each one.
 
 -f / --contact_folder
 ------------------
@@ -195,6 +204,9 @@ Another option is to set the -f flag to "false". In this case, a contact estimat
 
    c = max\{d, 5000\} :sup:`-1` .
 
+As of now, there is no option to use chromatin contact data on single-cell level. You would have to create your own interaction file (see below in the section about the --existing-abc). Also, if you have a separate set of regions for each cell, you would have to call STARE separately for each one.
+
+
 -r / --existing_abc
 ------------------
 If you have multiple files matching the columns specified with -n just give the path to one of them and STARE will search the directory to find the other files matching to the remaining columns, given that they end with their column suffix and txt.gz, for example "Test_V7_ABCpp_scoredInteractions_pan_cake.txt.gz". This of course omits the need to provide the other ABC-flags. In theory you can also give a region-gene mapping on your own. If you do so, the file requires three columns with the following headers:
@@ -214,7 +226,7 @@ The output depends on your input and the options you chose. Although you might n
 ABC output
 ===============
 
-You will get two files for each activity column you gave, one with all the interactions surpassing the set cut-off -t, and one summarising a variety of features for each gene. If -i / --tss_mode was set to all_tss, the columns are averaged across TSS. See the description of the columns below.
+You will get an additional ABC-specific metadata file and two files for each activity column you gave, one with all the interactions surpassing the set cut-off -t, and one summarising a variety of features for each gene. If -i / --tss_mode was set to all_tss, the columns are averaged across TSS. See the description of the columns below.
 
 .. image:: ../Figures/STARE_ABCOutput_Tables.png
   :alt: STARE_ABC_Tables
@@ -241,5 +253,13 @@ Computational power and parallelisation
 
 As you can imagine depending on the number of peaks, genes and activity columns, the calculations can get quite heavy on a computer's memory. In general, unsurprisingly, it is advisable to run STARE on a computer cluster. We aimed to have STARE running efficiently, which also means that some parts can be run in parallel. Note however, that especially for the ABC-scoring part, more provided cores will also mean more required memory. The read-in of the chromatin contact data is by far the most time-consuming part, which is why we decided to have this in parallel. However, if there are more than 200 activity columns the memory required for multiple chromosomes is quite high, and thus, the parallelization switches from chromosomes to batches of genes. If you don't have that much RAM available, set the number of cores to 1. It also depends on how sparse the contact data is. For example, reading chr1 of a K562 Hi-C data set requires ~1.2 GB, while it takes ~11.6 GB from the average Hi-C matrix from Fulco et al. (2019).
 
+
+***************
+Separate ABC-scoring
+***************
+
+If you're only interested in the ABC-scored interactions, you can also call that part independently. The flags are the ones marked with ABC in the input option tables above. Note, that when calling the ABC-part separately, the -o flag will not create a folder, but all output files will start with that path. Here is an example on how to run it (with bioconda call STARE_ABCpp directly, meaning remove the trailing ./Code/)::
+
+   ./Code/STARE_ABCpp -b <path_to_bed_file> -n <activity_column(s)> -a <gtf_annotation> -o <output_path> -w <window_size> -f <contact_data_dir> -k <bin_size> -t <score_cut_off>
 
 

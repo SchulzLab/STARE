@@ -1,26 +1,26 @@
 [Description]
-process	STARE 1.0.3
-run_by_user	dennis
-date	11_29_22
-time	14_37_39_N
-analysis_id	../Test//Test_V15/Test_V15
+process	STARE 1.0.4
+run_by_user	dhecker
+date	03_26_25
+time	12_58_31_207842132
+analysis_id	RETEST/Test_V15/Test_V15
 
 [Command]
-STARE.sh -g ../Test//Test_Data/example_sequence.fa -b ../Test//Test_Data/example_regions.bed -o ../Test//Test_V15 -s ../Test//Test_Data/Jaspar_Hocomoco_Kellis_human_transfac.txt -y 0.41 -a ../Test//Test_Data/example_annotation.gtf -w 3000 -x ../Test//Test_Data/example_exclude_regions.bed -i 5_tss
+STARE.sh -g Github/Test//Test_Data/example_sequence.fa -b Github/Test//Test_Data/example_regions.bed -o RETEST/Test_V15 -s Github/Test//Test_Data/Jaspar_Hocomoco_Kellis_human_transfac.txt -y 0.41 -a Github/Test//Test_Data/example_annotation.gtf -w 3000 -x Github/Test//Test_Data/example_exclude_regions.bed -i 5_tss
 
 [Inputs]
--b region_file	../Test//Test_Data/example_regions.bed
+-b region_file	Github/Test//Test_Data/example_regions.bed
 -n signal_column	0
--x excluded regions	../Test//Test_Data/example_exclude_regions.bed
+-x excluded regions	Github/Test//Test_Data/example_exclude_regions.bed
 
 [References]
--g genome_reference	../Test//Test_Data/example_sequence.fa
--s pscms	../Test//Test_Data/Jaspar_Hocomoco_Kellis_human_transfac.txt
+-g genome_reference	Github/Test//Test_Data/example_sequence.fa
+-s pscms	Github/Test//Test_Data/Jaspar_Hocomoco_Kellis_human_transfac.txt
 -y GC-content	0.41
--a genome_annotation	../Test//Test_Data/example_annotation.gtf
+-a genome_annotation	Github/Test//Test_Data/example_annotation.gtf
 
 [Output path]
-../Test//Test_V15
+RETEST/Test_V15
 
 [Parameters]
 -c cores	1
@@ -30,4 +30,4 @@ STARE.sh -g ../Test//Test_Data/example_sequence.fa -b ../Test//Test_Data/example
 
 [Metrics]
 Number of provided regions	7
-Number of considered psems	     818
+Number of considered psems	818
