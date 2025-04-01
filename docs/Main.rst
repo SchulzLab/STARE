@@ -107,7 +107,7 @@ Do not mix those styles, that won't work. You will notice that the one-character
 Required input
 ===============
 
-The table below provides the list of all input data (together with their corresponding arguments) that are mandatory, followed by the optional ones. If you miss one, STARE should notice and tell you. Some flags will be explained in more detail below the tables, marked with an asterisk (:sup:`*`). Flags that are also used by the ABC-mode are labelled accordingly (:sup:`ABC`), see also below the section `Separate ABC scoring <https://stare.readthedocs.io/en/latest/Main.html#separate-abc-scoring>`. You will find examples for each in **/Test/Test_Data/**.
+The table below provides the list of all input data (together with their corresponding arguments) that are mandatory, followed by the optional ones. If you miss one, STARE should notice and tell you. Some flags will be explained in more detail below the tables, marked with an asterisk (:sup:`*`). Flags that are also used by the ABC-mode are labelled accordingly (:sup:`ABC`), see also below the section `Separate ABC scoring <https://stare.readthedocs.io/en/latest/Main.html#separate-abc-scoring>`_. You will find examples for each in **/Test/Test_Data/**.
 
 +------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 |Flag                          |Description                                                                                                                                                                                                                                                                                                                                                                                                                                       |
@@ -213,7 +213,7 @@ If you have multiple files matching the columns specified with -n just give the 
 
 - *Ensembl ID*: Must match the ones from the --annotation file. 
 - *PeakID*: Has the format chr:start-end and must match the row names in the TRAP affinity file, as well as the locations in the --bed_file. This column is used by STARE to find the region in the bed-file to get its activity. If the region is on chr21 from 1200-1600, the 'PeakID' should be 21:1200-1600. Whether there is a chr-prefix or not should be consistent.
-- *intergenicScore*: Will be used to scale the affinities when summarising them on gene level. It depends on how the ABC-scoring was done. If the ABC-scoring was run with the adapted activity (-q True), then the 'intergenicScore' in the ABC result file is the same as the column 'adaptedActivity'. However, if it was run without the adapted activity (-q False), then the 'intergenicScore' is the activity of a region multiplied with the contact divided by the maximum contact found. The equations can be found  `here <https://stare.readthedocs.io/en/latest/Affinity_Summarisation.html`_ as part of the 'otherwise' condition in the equations under 'ABC-scoring' and 'Not-adapted ABC-scoring', respectively.
+- *intergenicScore*: Will be used to scale the affinities when summarising them on gene level. It depends on how the ABC-scoring was done. If the ABC-scoring was run with the adapted activity (-q True), then the 'intergenicScore' in the ABC result file is the same as the column 'adaptedActivity'. However, if it was run without the adapted activity (-q False), then the 'intergenicScore' is the activity of a region multiplied with the contact divided by the maximum contact found. The equations can be found  `here <https://stare.readthedocs.io/en/latest/Affinity_Summarisation.html>`_ as part of the 'otherwise' condition in the equations under 'ABC-scoring' and 'Not-adapted ABC-scoring', respectively.
 
 ***************
 Output
@@ -232,7 +232,6 @@ You will get an additional ABC-specific metadata file and two files for each act
   :alt: STARE_ABC_Tables
   :target: https://github.com/SchulzLab/STARE/blob/main/Figures/STARE_ABCOutput_Tables.pdf
 
-You can also call the ABC-part independently, without producing a gene-TF matrix, see `Separate ABC <https://stare.readthedocs.io/en/latest/Separate_ABC.html>`_.
 
 Gene-TF-matrices
 ===============
